@@ -5,18 +5,17 @@ CFLAGS = -O2 -Wall -I .
 # Others systems will probably require something different.
 LIB = -lpthread
 
-all: tiny cgi
+all: server
 
-tiny: tiny.c csapp.o
-	$(CC) $(CFLAGS) -o tiny tiny.c csapp.o $(LIB)
+server: src/server/server.c csapp.o config.o
+	$(CC) $(CFLAGS) -o server src/server/server.c csapp.o config.o -I src/config -I src/core $(LIB)
 
-csapp.o: csapp.c
-	$(CC) $(CFLAGS) -c csapp.c
+csapp.o: src/core/csapp.c
+	$(CC) $(CFLAGS) -c src/core/csapp.c
 
-cgi:
-	(cd cgi-bin; make)
+config.o: src/config/config.c csapp.o
+	$(CC) $(CFLAGS) -c src/config/config.c csapp.o -I src/core
+
 
 clean:
-	rm -f *.o tiny *~
-	(cd cgi-bin; make clean)
-
+	rm -f *.o server *~
