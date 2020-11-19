@@ -1,5 +1,8 @@
 #include "config.h"
 
+CS cs;
+void signal_handler(int sig);
+
 int main(int argc, char **argv, char **envp){
 
     //加载配置文件
@@ -14,18 +17,39 @@ int main(int argc, char **argv, char **envp){
         }
     }
     //读取配置文件
-    CS cs;
+    
     if(loadConfig(configPath,&cs) < 1){
         fprintf(stderr, "nadia config file loade faile<%s> \n", configPath);
         exit(1);
     }
-
+    //注册信号事件
+    Signal(SIGINT, signal_handler);   /* ctrl-c */
+    Signal(SIGCHLD, signal_handler); 
+    Signal(SIGTSTP, signal_handler); /* ctrl-z */
 
     int listenfd, connfd;
     char hostname[MAXLINE], port[MAXLINE];
     socklen_t clientlen;
     struct sockaddr_storage clientaddr;
-    fprintf(stderr, "start listen port<%d> \n", (*(cs.servers))->listen);
+    fd_set read_set, ready_set;
+    FD_ZERO(&read_set);
+
+    __int16_t serverSize = cs.serverSize;
+    SS ** servers = cs.servers;
+    for(int i = 0;i<serverSize;i++,servers++){
+        listenfd = Open_listenfd((*servers)->listen);
+        fprintf(stderr, "start listen port<%s> \n", (*(cs.servers))->listen);
+        FD_SET(listenfd, &read_set);
+    }
+
+    while (1){
+        ready_set = read_set;
+        Select(listenfd+1, &ready_set, NULL, NULL, NULL);
+        
+
+
+
+    }
     
 
     // listenfd = Open_listenfd(argv[1]);
@@ -39,6 +63,14 @@ int main(int argc, char **argv, char **envp){
     //     Close(connfd);                                            //line:netp:tiny:close
     // }
 
-    freeConfig(&cs);
+    while(1){
+
+    }
     return 0;
+}
+
+void signal_handler(int sig) {
+    fprintf(stderr, "stop nadia server\n");
+    freeConfig(&cs);
+    exit(0);
 }
