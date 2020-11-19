@@ -27,7 +27,7 @@ typedef struct location_struct{
     char *path;
     int isStatic;
     char *root;
-    PS proxy;
+    PS *proxy;
 } LS;
 
 /*
@@ -36,8 +36,9 @@ typedef struct location_struct{
     locations 监听端口代理信息
 */
 typedef struct server_struct{
-    unsigned int listen;
-    LS *locations;
+    char *listen;
+    __int16_t locationSize;
+    LS **locations;
 } SS;
 
 /*
@@ -45,10 +46,16 @@ typedef struct server_struct{
     servers 代理信息列表
 */
 typedef struct config_struct{
-    SS *servers;
+    __int16_t serverSize;
+    SS **servers;
 } CS;
 
 /*
 根据文件路径加载配置文件
+retrun 1 或 0
+1: 读取配置成功
+0: 读取配置失败
 */
-CS *loadConfig(char *path);
+int loadConfig(char *path, CS *cs);
+
+void freeConfig(CS *cs);
