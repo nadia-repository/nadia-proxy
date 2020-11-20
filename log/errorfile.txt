@@ -1,0 +1,6 @@
+start listen port<8888> 
+start listen port<8888> 
+stop nadia server
+free servers size =2 
+free location size =0 
+free location size =0 

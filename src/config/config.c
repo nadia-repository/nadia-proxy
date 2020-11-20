@@ -42,17 +42,20 @@ void freeProxy(CS *cs){
 
 
 void mockConfig(CS *cs){
+    SS **servers = malloc(sizeof(SS*) *2);
+
     SS *server = malloc(sizeof(SS));
     server->listen = "8888";
     server->locationSize = 0;
-
-
-    SS **servers = malloc(sizeof(server) *1);
-
     servers[0] = server;
 
+    server = malloc(sizeof(SS));
+    server->listen = "7777";
+    server->locationSize = 0;
+    servers[1] = server;
+
     cs->servers = servers;
-    cs->serverSize = 1;
+    cs->serverSize = 2;
 }
 
 void initFilePath(char *dir,CP* cp){
@@ -89,5 +92,5 @@ int loadLog(char *path){
 
 int loadConfigs(char *path){
 
-    return 0;
+    return 1;
 }

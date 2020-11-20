@@ -3,6 +3,7 @@
 CS cs;
 void signal_handler(int sig);
 void echo(int connfd);
+void *doit(void *vargp);
 
 int main(int argc, char **argv, char **envp){
 
@@ -26,10 +27,10 @@ int main(int argc, char **argv, char **envp){
         exit(1);
     }
     //读取日志配置
-    if(loadLog(cp.logPath)<1){
-        fprintf(stderr, "Nadia log file redirect faile<%s> \n", cp.logPath);
-        exit(1);
-    }
+    // if(loadLog(cp.logPath)<1){
+    //     fprintf(stderr, "Nadia log file redirect faile<%s> \n", cp.logPath);
+    //     exit(1);
+    // }
     //读取配置信息配置
     if(loadConfigs(cp.configsPath)<1){
         fprintf(stderr, "Nadia config file load faile<%s> \n", cp.configsPath);
@@ -42,10 +43,7 @@ int main(int argc, char **argv, char **envp){
     Signal(SIGCHLD, signal_handler); 
     Signal(SIGTSTP, signal_handler); /* ctrl-z */
 
-    int listenfd, connfd;
-    char hostname[MAXLINE], port[MAXLINE];
-    socklen_t clientlen;
-    struct sockaddr_storage clientaddr;
+    int listenfd;
     fd_set read_set, ready_set;
     FD_ZERO(&read_set);
 
@@ -55,7 +53,7 @@ int main(int argc, char **argv, char **envp){
     int *lfd = (int*)calloc(serverSize,sizeof(int)); //记录当前所有的监听文件描述符
     for(int i = 0;i<serverSize;i++,servers++){
         listenfd = Open_listenfd((*servers)->listen);
-        fprintf(stderr, "start listen port<%s> \n", (*(cs.servers))->listen);
+        fprintf(stderr, "start listen port<%s> \n", (*servers)->listen);
         FD_SET(listenfd, &read_set);
         lfd[i] = listenfd;
     }
@@ -63,17 +61,13 @@ int main(int argc, char **argv, char **envp){
     while (1){
         ready_set = read_set;
         Select(listenfd+1, &ready_set, NULL, NULL, NULL);
+
         //todo 判断listenfd
         for(int i = 0;i<serverSize;i++){
             if (FD_ISSET(lfd[i] , &ready_set)){
                 //todo 根据lfd[i] listenfd 获取server信息
-                clientlen = sizeof(struct sockaddr_storage); 
-                connfd = Accept(lfd[i], (SA *)&clientaddr, &clientlen);
-                Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE,
-                    port, MAXLINE, 0);
-                printf("Accepted connection from (%s, %s)\n", hostname, port);
-                echo(connfd);
-                Close(connfd);
+                pthread_t tid[10];
+                Pthread_create(&tid[i], NULL, doit, &lfd[i]);
             }
         }
     }
@@ -108,4 +102,21 @@ void echo(int connfd) {
         printf("server received %d bytes\n", n);
         Rio_writen(connfd, buf, n);
     }
+}
+
+void *doit(void *vargp){
+    int connfd;
+    char hostname[MAXLINE], port[MAXLINE];
+    socklen_t clientlen;
+    struct sockaddr_storage clientaddr;
+
+    int *lfp = (int*)vargp;
+    clientlen = sizeof(struct sockaddr_storage); 
+    connfd = Accept(*lfp, (SA *)&clientaddr, &clientlen);
+    Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE,
+        port, MAXLINE, 0);
+    printf("Accepted connection from (%s, %s)\n", hostname, port);
+    echo(connfd);
+    Close(connfd);
+    return NULL;
 }
