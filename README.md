@@ -1,4 +1,4 @@
-# nadia-platform
+# nadia-proxy
 ### 功能
 1. Web Service
   * 静态代理
