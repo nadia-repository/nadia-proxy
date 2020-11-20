@@ -4,7 +4,7 @@
 
 void mockConfig(CS *cs);
 
-int loadConfig(char *path, CS *cs){
+int loadProxy(char *path, CS *cs){
     fprintf(stderr, "start load nadia config file from<%s> \n", path);
     #ifdef IS_MOCK
         fprintf(stderr, "====================in mock \n");
@@ -16,7 +16,7 @@ int loadConfig(char *path, CS *cs){
     #endif
 }
 
-void freeConfig(CS *cs){
+void freeProxy(CS *cs){
     SS **servers = cs->servers;
     __int16_t serversSize = cs->serverSize;
     fprintf(stderr, "free servers size =%d \n",serversSize);
@@ -53,4 +53,34 @@ void mockConfig(CS *cs){
 
     cs->servers = servers;
     cs->serverSize = 1;
+}
+
+void initFilePath(char *dir,CP* cp){
+    // char buf[MAXBUF];
+    // sprintf(buf,dir);
+    // sprintf(buf,"proxy.conf");
+    // cp->proxyPath = buf;
+
+    // sprintf(buf,dir);
+    // sprintf(buf,"log.conf");
+    // cp->logPath = buf;
+
+    // sprintf(buf,dir);
+    // sprintf(buf,"config.conf");
+    // cp->configsPath = buf;
+}
+
+int loadLog(char *path){
+    int logfd,errorfd;
+    umask(DEF_UMASK);
+    logfd = Open("/Users/xiangshi/Documents/workspace_c/nadia-proxy/log/logfile.txt", O_CREAT|O_TRUNC|O_WRONLY|O_SHLOCK, 0777);
+    if(Dup2(logfd,STDOUT_FILENO)<0){
+        return 0;
+    }
+    return 1;
+}
+
+int loadConfigs(char *path){
+
+    return 0;
 }

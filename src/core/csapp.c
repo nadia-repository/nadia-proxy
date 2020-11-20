@@ -377,7 +377,7 @@ int Dup2(int fd1, int fd2)
     int rc;
 
     if ((rc = dup2(fd1, fd2)) < 0)
-	unix_error("Dup2 error");
+	    unix_error("Dup2 error");
     return rc;
 }
 

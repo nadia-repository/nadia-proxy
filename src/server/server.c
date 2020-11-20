@@ -7,22 +7,33 @@ void echo(int connfd);
 int main(int argc, char **argv, char **envp){
 
     //加载配置文件
-    char *configPath = "/nadia/proxy.conf";
+    char *configPath = "/nadia/config/";
     while (*envp) {
         char *env = *(envp++);
-
-        // printf("env    %s\n",env);
+        //从环境变量中获取配置目录
         if(!strcasecmp(env, "NADIA_CONFIG")){
             configPath = env;
             break;
         }
     }
-    //读取配置文件
-    
-    if(loadConfig(configPath,&cs) < 1){
-        fprintf(stderr, "nadia config file loade faile<%s> \n", configPath);
+    //初始化配置文件路径
+    CP cp;
+    initFilePath(configPath,&cp);
+
+    //读取代理配置文件
+    if(loadProxy(cp.proxyPath,&cs) < 1){
+        fprintf(stderr, "nadia config file loade faile<%s> \n", cp.proxyPath);
         exit(1);
     }
+    //读取日志配置
+    if(loadLog(cp.logPath)<1){
+        fprintf(stderr, "nadia log file redirect faile<%s> \n", cp.logPath);
+        exit(1);
+    }
+    //读取配置信息配置
+
+
+
     //注册信号事件
     Signal(SIGINT, signal_handler);   /* ctrl-c */
     Signal(SIGCHLD, signal_handler); 
@@ -37,21 +48,31 @@ int main(int argc, char **argv, char **envp){
 
     __int16_t serverSize = cs.serverSize;
     SS ** servers = cs.servers;
+    
+    int *lfd = (int*)calloc(serverSize,sizeof(int)); //记录当前所有的监听文件描述符
     for(int i = 0;i<serverSize;i++,servers++){
         listenfd = Open_listenfd((*servers)->listen);
         fprintf(stderr, "start listen port<%s> \n", (*(cs.servers))->listen);
         FD_SET(listenfd, &read_set);
+        lfd[i] = listenfd;
     }
 
     while (1){
         ready_set = read_set;
         Select(listenfd+1, &ready_set, NULL, NULL, NULL);
         //todo 判断listenfd
-
-        clientlen = sizeof(struct sockaddr_storage); 
-        connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen);
-        echo(connfd);
-        Close(connfd);
+        for(int i = 0;i<serverSize;i++){
+            if (FD_ISSET(lfd[i] , &ready_set)){
+                //todo 根据lfd[i] listenfd 获取server信息
+                clientlen = sizeof(struct sockaddr_storage); 
+                connfd = Accept(lfd[i], (SA *)&clientaddr, &clientlen);
+                Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE,
+                    port, MAXLINE, 0);
+                printf("Accepted connection from (%s, %s)\n", hostname, port);
+                echo(connfd);
+                Close(connfd);
+            }
+        }
     }
     
 
@@ -70,7 +91,7 @@ int main(int argc, char **argv, char **envp){
 
 void signal_handler(int sig) {
     fprintf(stderr, "stop nadia server\n");
-    freeConfig(&cs);
+    freeProxy(&cs);
     exit(0);
 }
 

@@ -51,11 +51,35 @@ typedef struct config_struct{
 } CS;
 
 /*
-根据文件路径加载配置文件
+配置文件路径结构
+    proxyPath 代理文件
+    logPath 日志文件
+    configsPath 配置项
+*/
+typedef struct config_path{
+  char *proxyPath;
+  char *logPath;
+  char *configsPath;
+} CP;
+
+
+/*
+根据文件路径加载Proxy配置文件
 retrun 1 或 0
 1: 读取配置成功
 0: 读取配置失败
 */
-int loadConfig(char *path, CS *cs);
+int loadProxy(char *path, CS *cs);
 
-void freeConfig(CS *cs);
+void freeProxy(CS *cs);
+
+int loadLog(char *path);
+
+int loadConfigs(char *path);
+
+/*
+初始化配置文件路径
+    dir 配置文件目录
+    cp  配置文件路径结构
+*/
+void initFilePath(char *dir,CP* cp);
