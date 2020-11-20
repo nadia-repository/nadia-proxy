@@ -22,16 +22,19 @@ int main(int argc, char **argv, char **envp){
 
     //读取代理配置文件
     if(loadProxy(cp.proxyPath,&cs) < 1){
-        fprintf(stderr, "nadia config file loade faile<%s> \n", cp.proxyPath);
+        fprintf(stderr, "Nadia proxy file load faile<%s> \n", cp.proxyPath);
         exit(1);
     }
     //读取日志配置
     if(loadLog(cp.logPath)<1){
-        fprintf(stderr, "nadia log file redirect faile<%s> \n", cp.logPath);
+        fprintf(stderr, "Nadia log file redirect faile<%s> \n", cp.logPath);
         exit(1);
     }
     //读取配置信息配置
-
+    if(loadConfigs(cp.configsPath)<1){
+        fprintf(stderr, "Nadia config file load faile<%s> \n", cp.configsPath);
+        exit(1);
+    }
 
 
     //注册信号事件

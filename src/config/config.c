@@ -77,6 +77,13 @@ int loadLog(char *path){
     if(Dup2(logfd,STDOUT_FILENO)<0){
         return 0;
     }
+
+    umask(DEF_UMASK);
+    errorfd = Open("/Users/xiangshi/Documents/workspace_c/nadia-proxy/log/errorfile.txt", O_CREAT|O_TRUNC|O_WRONLY|O_SHLOCK, 0777);
+    if(Dup2(errorfd,STDERR_FILENO)<0){
+        return 0;
+    }
+
     return 1;
 }
 
