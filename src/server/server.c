@@ -2,6 +2,7 @@
 
 CS cs;
 void signal_handler(int sig);
+void echo(int connfd);
 
 int main(int argc, char **argv, char **envp){
 
@@ -45,10 +46,12 @@ int main(int argc, char **argv, char **envp){
     while (1){
         ready_set = read_set;
         Select(listenfd+1, &ready_set, NULL, NULL, NULL);
-        
+        //todo 判断listenfd
 
-
-
+        clientlen = sizeof(struct sockaddr_storage); 
+        connfd = Accept(listenfd, (SA *)&clientaddr, &clientlen);
+        echo(connfd);
+        Close(connfd);
     }
     
 
@@ -62,10 +65,6 @@ int main(int argc, char **argv, char **envp){
     //     doit(connfd);                                             //line:netp:tiny:doit
     //     Close(connfd);                                            //line:netp:tiny:close
     // }
-
-    while(1){
-
-    }
     return 0;
 }
 
@@ -73,4 +72,16 @@ void signal_handler(int sig) {
     fprintf(stderr, "stop nadia server\n");
     freeConfig(&cs);
     exit(0);
+}
+
+void echo(int connfd) {
+    int n; 
+    char buf[MAXLINE]; 
+    rio_t rio;
+
+    Rio_readinitb(&rio, connfd);
+    while((n = Rio_readlineb(&rio, buf, MAXLINE)) != 0) {
+        printf("server received %d bytes\n", n);
+        Rio_writen(connfd, buf, n);
+    }
 }
