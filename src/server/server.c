@@ -66,7 +66,7 @@ int main(int argc, char **argv, char **envp){
         for(int i = 0;i<serverSize;i++){
             if (FD_ISSET(lfd[i] , &ready_set)){
                 //todo 根据lfd[i] listenfd 获取server信息
-                pthread_t tid[10];
+                pthread_t tid[10];//todo需要实现线程池
                 Pthread_create(&tid[i], NULL, doit, &lfd[i]);
             }
         }
