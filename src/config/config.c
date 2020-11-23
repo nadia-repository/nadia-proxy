@@ -81,13 +81,13 @@ void initFilePath(char *dir,CP* cp){
 int loadLog(char *path){
     int logfd,errorfd;
     umask(DEF_UMASK);
-    logfd = Open("/Users/xiangshi/Documents/workspace_c/nadia-proxy/log/logfile.txt", O_CREAT|O_TRUNC|O_WRONLY|F_SHLCK, 0777);
+    logfd = Open("/Users/xiangshi/Documents/workspace_c/nadia-proxy/log/logfile.txt", FILE_FLAG, 0777);
     if(Dup2(logfd,STDOUT_FILENO)<0){
         return 0;
     }
 
     umask(DEF_UMASK);
-    errorfd = Open("/Users/xiangshi/Documents/workspace_c/nadia-proxy/log/errorfile.txt", O_CREAT|O_TRUNC|O_WRONLY|F_SHLCK, 0777);
+    errorfd = Open("/Users/xiangshi/Documents/workspace_c/nadia-proxy/log/errorfile.txt", FILE_FLAG, 0777);
     if(Dup2(errorfd,STDERR_FILENO)<0){
         return 0;
     }

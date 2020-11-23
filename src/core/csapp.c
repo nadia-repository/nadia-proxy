@@ -323,7 +323,7 @@ int Open(const char *pathname, int flags, mode_t mode)
     int rc;
 
     if ((rc = open(pathname, flags, mode))  < 0)
-	unix_error("Open error");
+	    unix_error("Open error");
     return rc;
 }
 
@@ -332,7 +332,7 @@ ssize_t Read(int fd, void *buf, size_t count)
     ssize_t rc;
 
     if ((rc = read(fd, buf, count)) < 0) 
-	unix_error("Read error");
+	    unix_error("Read error");
     return rc;
 }
 
@@ -341,7 +341,7 @@ ssize_t Write(int fd, const void *buf, size_t count)
     ssize_t rc;
 
     if ((rc = write(fd, buf, count)) < 0)
-	unix_error("Write error");
+	    unix_error("Write error");
     return rc;
 }
 
@@ -434,7 +434,7 @@ void *Mmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset)
     void *ptr;
 
     if ((ptr = mmap(addr, len, prot, flags, fd, offset)) == ((void *) -1))
-	unix_error("mmap error");
+	    unix_error("mmap error");
     return(ptr);
 }
 

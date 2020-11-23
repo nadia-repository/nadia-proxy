@@ -1,4 +1,11 @@
 #include "csapp.h"
+
+#ifdef __APPLE__
+    #define FILE_FLAG O_CREAT|O_TRUNC|O_WRONLY
+#elif __linux__
+    #define FILE_FLAG O_CREAT|O_TRUNC|O_WRONLY|F_SHLCK
+#endif
+
 /*
 反向代理负载均衡策略
     loop:轮训
