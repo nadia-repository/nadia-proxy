@@ -1,14 +1,55 @@
-typedef struct hashmap_element{
+#include <stdio.h>
+#include <stdlib.h>
+
+#define DEFAULT_INITIAL_CAPACITY 16
+
+/*
+hashmap中node对象
+    hash
+*/
+typedef struct node_struct{
+    int hash;
+    int key;
     void *data;
-    void *next;
-} HE;
+    struct node_struct *next;
+} NODE;
 
+/*
+hashmap对象结构
+    put 绑定put_hashmap方法
+    get 绑定get_hashmap方法
+*/
 typedef struct hashmap_struct{
-    int DEFAULT_CAPACITY = 10;
-    int size;
-    HE elementData[10];
-} HM;
+    void (* put)(struct hashmap_struct *map ,int key,void *value);
+    void * (* get)(struct hashmap_struct *map ,int key);
+    unsigned int size;
+    NODE **nodes;
+} MAP_INSTANCE;
 
-int put(HM *map,void *key,void *value);
+/*
+初始化hashmap
+    size 为空时，默认大小为DEFAULT_INITIAL_CAPACITY
+*/
+MAP_INSTANCE *init_hashmap(unsigned int size);
 
-void* get();
+/*
+往hashmap中添加元素
+    map hashmap对象
+    key
+    value
+*/
+void put_hashmap(MAP_INSTANCE *map ,int key,void *value);
+
+/*
+根据key获取value
+    map hashmap对象
+    key
+*/
+void *get_hashmap(MAP_INSTANCE *map ,int key);
+
+/*
+根据key计算hashcode
+    map hashmap对象
+    key
+*/
+int hash(MAP_INSTANCE *map, int key);

@@ -1059,8 +1059,11 @@ int Open_listenfd(char *port)
 {
     int rc;
 
-    if ((rc = open_listenfd(port)) < 0)
-	unix_error("Open_listenfd error");
+    if ((rc = open_listenfd(port)) < 0){
+        char msg[MAXLINE] = "Open_listenfd error with port<%s>";
+        sprintf(msg,msg,port);
+	    unix_error(msg);
+    }
     return rc;
 }
 

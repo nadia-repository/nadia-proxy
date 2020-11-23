@@ -1,11 +1,11 @@
 #include "config.h"
+#include "hashmap.h"
 
 CS cs;
 void signal_handler(int sig);
-void pipesig_handler(int sig);
 void echo(int connfd);
 void parser_request(int connfd);
-void *proxy(void *vargp);
+void *do_proxy(void *vargp);
 void read_requesthdrs(rio_t *rp);
 void serve_static(int fd, char *filename, int filesize);
 void get_filetype(char *filename, char *filetype);
@@ -53,21 +53,26 @@ int main(int argc, char **argv, char **envp){
     Signal(SIGINT, signal_handler);   /* ctrl-c */
     Signal(SIGCHLD, signal_handler); 
     Signal(SIGTSTP, signal_handler); /* ctrl-z */
-    Signal(SIGPIPE, SIG_IGN);
+    Signal(SIGPIPE, SIG_IGN);//屏蔽SIGPIPE信号，如果服务端向一个已经关闭的客户端发送两次数据，服务端将会受到SIGPIPE信号并终止服务端进程
 
-    int listenfd;
+    int listenfd=0;
     fd_set read_set, ready_set;
     FD_ZERO(&read_set);
 
     __int16_t serverSize = cs.serverSize;
     SS ** servers = cs.servers;
     
+    //key---value  ----> listenfd --- server
+    MAP_INSTANCE *lfdMap = init_hashmap(NULL);
+
     int *lfd = (int*)calloc(serverSize,sizeof(int)); //记录当前所有的监听文件描述符
     for(int i = 0;i<serverSize;i++,servers++){
         listenfd = Open_listenfd((*servers)->listen);
         fprintf(stderr, "start listen port<%s> \n", (*servers)->listen);
         FD_SET(listenfd, &read_set);
         lfd[i] = listenfd;
+        //维护listenfd 和 server的映射关系
+        lfdMap->put(lfdMap,listenfd,*servers);
     }
 
     while (1){
@@ -79,7 +84,7 @@ int main(int argc, char **argv, char **envp){
             if (FD_ISSET(lfd[i] , &ready_set)){
                 //todo 根据lfd[i] listenfd 获取server信息
                 pthread_t tid[10];//todo需要实现线程池
-                Pthread_create(&tid[i], NULL, proxy, &lfd[i]);
+                Pthread_create(&tid[i], NULL, do_proxy, &lfd[i]);
             }
         }
     }
@@ -87,14 +92,13 @@ int main(int argc, char **argv, char **envp){
     return 0;
 }
 
+/*
+信号处理方法，回收内存并退出进程
+*/
 void signal_handler(int sig) {
     fprintf(stderr, "stop nadia server\n");
     freeProxy(&cs);
     exit(0);
-}
-
-void pipesig_handler(int sig){
-    fprintf(stderr, "pipesig_handler in\n");
 }
 
 void echo(int connfd) {
@@ -110,7 +114,7 @@ void echo(int connfd) {
     }
 }
 
-void *proxy(void *vargp){
+void *do_proxy(void *vargp){
     pthread_detach(pthread_self());//分离自己，防止被其他线程中断
     int connfd;
     char hostname[MAXLINE], port[MAXLINE];
@@ -185,6 +189,9 @@ void serve_static(int fd, char *filename, int filesize) {
     Munmap(srcp, filesize);             
 }
 
+/*
+服务端文件不存在时返回错误页
+*/
 void clienterror(int fd, char *cause, char *errnum,
                  char *shortmsg, char *longmsg) {
     char buf[MAXLINE];
@@ -196,7 +203,7 @@ void clienterror(int fd, char *cause, char *errnum,
     Rio_writen(fd, buf, strlen(buf));
 
     /* Print the HTTP response body */
-    sprintf(buf, "<html><title>Tiny Error</title>");
+    sprintf(buf, "<html><title>Nadia Error</title>");
     Rio_writen(fd, buf, strlen(buf));
     sprintf(buf, "<body bgcolor=""ffffff"">\r\n");
     Rio_writen(fd, buf, strlen(buf));

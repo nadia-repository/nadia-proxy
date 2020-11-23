@@ -9,7 +9,7 @@ int loadProxy(char *path, CS *cs){
         mockConfig(cs);
         return 1;
     #else
-        
+
         return 0;
     #endif
 }
@@ -54,8 +54,15 @@ void mockConfig(CS *cs){
 
     server = malloc(sizeof(SS));
     server->listen = "80";
-    server->locationSize = 0;
+    server->locationSize = 1;
     servers[2] = server;
+    LS lss[1];
+    LS ls;
+    ls.isStatic = 1;
+    ls.path = "/";
+    ls.root = "/Users/xiangshi/Documents/workspace_c/nadia-proxy/";
+    lss[0] = ls;
+    server->locations = (LS**)lss;
 
     cs->servers = servers;
     cs->serverSize = 3;
