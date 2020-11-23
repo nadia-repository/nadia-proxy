@@ -158,7 +158,7 @@ handler_t *Signal(int signum, handler_t *handler)
     action.sa_flags = SA_RESTART; /* Restart syscalls if possible */
 
     if (sigaction(signum, &action, &old_action) < 0)
-	unix_error("Signal error");
+	    unix_error("Signal error");
     return (old_action.sa_handler);
 }
 /* $end sigaction */
@@ -359,7 +359,7 @@ void Close(int fd)
     int rc;
 
     if ((rc = close(fd)) < 0)
-	unix_error("Close error");
+	    unix_error("Close error");
 }
 
 int Select(int  n, fd_set *readfds, fd_set *writefds,
@@ -368,7 +368,7 @@ int Select(int  n, fd_set *readfds, fd_set *writefds,
     int rc;
 
     if ((rc = select(n, readfds, writefds, exceptfds, timeout)) < 0)
-	unix_error("Select error");
+	    unix_error("Select error");
     return rc;
 }
 
@@ -901,14 +901,14 @@ ssize_t Rio_readn(int fd, void *ptr, size_t nbytes)
     ssize_t n;
   
     if ((n = rio_readn(fd, ptr, nbytes)) < 0)
-	unix_error("Rio_readn error");
+	    unix_error("Rio_readn error");
     return n;
 }
 
 void Rio_writen(int fd, void *usrbuf, size_t n) 
 {
     if (rio_writen(fd, usrbuf, n) != n)
-	unix_error("Rio_writen error");
+	    unix_error("Rio_writen error");
 }
 
 void Rio_readinitb(rio_t *rp, int fd)

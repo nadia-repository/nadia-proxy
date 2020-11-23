@@ -42,7 +42,7 @@ void freeProxy(CS *cs){
 
 
 void mockConfig(CS *cs){
-    SS **servers = malloc(sizeof(SS*) *2);
+    SS **servers = malloc(sizeof(SS*) *3);
 
     SS *server = malloc(sizeof(SS));
     server->listen = "8888";
@@ -54,8 +54,13 @@ void mockConfig(CS *cs){
     server->locationSize = 0;
     servers[1] = server;
 
+    server = malloc(sizeof(SS));
+    server->listen = "80";
+    server->locationSize = 0;
+    servers[2] = server;
+
     cs->servers = servers;
-    cs->serverSize = 2;
+    cs->serverSize = 3;
 }
 
 void initFilePath(char *dir,CP* cp){
@@ -76,13 +81,13 @@ void initFilePath(char *dir,CP* cp){
 int loadLog(char *path){
     int logfd,errorfd;
     umask(DEF_UMASK);
-    logfd = Open("/Users/xiangshi/Documents/workspace_c/nadia-proxy/log/logfile.txt", O_CREAT|O_TRUNC|O_WRONLY|O_SHLOCK, 0777);
+    logfd = Open("/Users/xiangshi/Documents/workspace_c/nadia-proxy/log/logfile.txt", O_CREAT|O_TRUNC|O_WRONLY|F_SHLCK, 0777);
     if(Dup2(logfd,STDOUT_FILENO)<0){
         return 0;
     }
 
     umask(DEF_UMASK);
-    errorfd = Open("/Users/xiangshi/Documents/workspace_c/nadia-proxy/log/errorfile.txt", O_CREAT|O_TRUNC|O_WRONLY|O_SHLOCK, 0777);
+    errorfd = Open("/Users/xiangshi/Documents/workspace_c/nadia-proxy/log/errorfile.txt", O_CREAT|O_TRUNC|O_WRONLY|F_SHLCK, 0777);
     if(Dup2(errorfd,STDERR_FILENO)<0){
         return 0;
     }
