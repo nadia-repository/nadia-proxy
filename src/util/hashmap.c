@@ -68,3 +68,7 @@ int hash(MAP_INSTANCE *map ,int key){
     unsigned int size = map->size;
     return key % size;
 }
+
+void resize(MAP_INSTANCE *map){
+    
+}

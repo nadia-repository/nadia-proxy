@@ -61,3 +61,9 @@ void delete_hashmap(MAP_INSTANCE *map, int key);
     key
 */
 int hash(MAP_INSTANCE *map, int key);
+
+/*
+超过当前容量时扩容
+    map hashmap对象
+*/
+void resize(MAP_INSTANCE *map);
