@@ -4,7 +4,7 @@ CS cs;
 void signal_handler(int sig);
 void pipesig_handler(int sig);
 void echo(int connfd);
-void parser_server(int connfd);
+void parser_request(int connfd);
 void *proxy(void *vargp);
 void read_requesthdrs(rio_t *rp);
 void serve_static(int fd, char *filename, int filesize);
@@ -16,6 +16,9 @@ int main(int argc, char **argv, char **envp){
 
     //nadia默认路径
     char *nadiaPath = "/Users/xiangshi/Documents/workspace_c/nadia-proxy/";
+    fprintf(stderr, "Wellcome Naida Proxy \n");
+    fprintf(stderr, "Naida config path<%s> \n",nadiaPath);
+
     //加载配置文件
     char *configPath = "/nadia/config/";
     while (*envp) {
@@ -35,7 +38,7 @@ int main(int argc, char **argv, char **envp){
         fprintf(stderr, "Nadia proxy file load faile<%s> \n", cp.proxyPath);
         exit(1);
     }
-    //读取日志配置
+    //读取日志配置 todo
     // if(loadLog(cp.logPath)<1){
     //     fprintf(stderr, "Nadia log file redirect faile<%s> \n", cp.logPath);
     //     exit(1);
@@ -120,12 +123,16 @@ void *proxy(void *vargp){
     Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE,
         port, MAXLINE, 0);
     printf("Accepted connection from (%s, %s)\n", hostname, port);
-    parser_server(connfd);
+    parser_request(connfd);
     Close(connfd);
     return NULL;
 }
 
-void parser_server(int connfd){
+/*
+解析请求，并执行相应的代理
+    connfd 连接描述符
+*/
+void parser_request(int connfd){
     rio_t rio;
     struct stat sbuf;
     char buf[MAXLINE], method[MAXLINE], uri[MAXLINE], version[MAXLINE];
@@ -151,21 +158,26 @@ void parser_server(int connfd){
 
 
 }
-
+/*
+将服务器静态资源写入socket并返回给客户端
+    fd 连接文件描述符
+    filename 客户端请求的文件在服务端的真实路径
+    filesize 文件大小
+*/
 void serve_static(int fd, char *filename, int filesize) {
     int srcfd;
     char *srcp, filetype[MAXLINE], buf[MAXBUF];
-
+    //写入http头部信息
     get_filetype(filename, filetype);    
     sprintf(buf, "HTTP/1.0 200 OK\r\n"); 
     Rio_writen(fd, buf, strlen(buf));
-    sprintf(buf, "Server: Tiny Web Server\r\n");
+    sprintf(buf, "Server: Naida Web Server\r\n");
     Rio_writen(fd, buf, strlen(buf));
     sprintf(buf, "Content-length: %d\r\n", filesize);
     Rio_writen(fd, buf, strlen(buf));
     sprintf(buf, "Content-type: %s\r\n\r\n", filetype);
     Rio_writen(fd, buf, strlen(buf));    
-
+    //打开并映射文件，写回至客户端
     srcfd = Open(filename, O_RDONLY, 0); 
     srcp = Mmap(0, filesize, PROT_READ, MAP_PRIVATE, srcfd, 0); 
     Close(srcfd);                       

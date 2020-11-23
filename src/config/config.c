@@ -1,17 +1,15 @@
 #include "config.h"
 
-#define IS_MOCK 1
-
 void mockConfig(CS *cs);
 
 int loadProxy(char *path, CS *cs){
     fprintf(stderr, "start load nadia config file from<%s> \n", path);
     #ifdef IS_MOCK
-        fprintf(stderr, "====================in mock \n");
+        fprintf(stderr, "Load procy configs from mock \n");
         mockConfig(cs);
         return 1;
     #else
-        fprintf(stderr, "====================not mock \n");
+        
         return 0;
     #endif
 }
