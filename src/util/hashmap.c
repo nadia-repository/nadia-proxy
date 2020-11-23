@@ -10,6 +10,7 @@ MAP_INSTANCE *init_hashmap(unsigned int size){
     map->nodes = nodes;
     map->put = &put_hashmap;
     map->get = &get_hashmap;
+    map->delete = &delete_hashmap;
     return map;
 }
 
@@ -17,36 +18,26 @@ MAP_INSTANCE *init_hashmap(unsigned int size){
 void put_hashmap(MAP_INSTANCE *map ,int key,void *value){
     fprintf(stderr, "into put_hashmap key=%d \n", key);
     int hashcode = hash(map,key);
-    NODE *headNode = (map->nodes)[hashcode];
-    if(headNode == NULL){
-        fprintf(stderr, "put_hashmap create new node hashcode=%d key=%d \n", hashcode,key);
-        NODE *node = malloc(sizeof(NODE));
-        node->data = value;
-        node->hash = hashcode;
-        node->key = key;
-        node->next = NULL;
-        NODE **nodes = map->nodes;
-        nodes[hashcode] = node;
-    }else{
-        NODE *entry = headNode;
-        while (1){
-            if(entry == NULL){
-                fprintf(stderr, "put_hashmap insert node hashcode=%d key=%d \n", hashcode,key);
-                NODE *newNode = malloc(sizeof(NODE));
-                newNode->data = value;
-                newNode->hash = hashcode;
-                newNode->key = key;
-                newNode->next = headNode;
-                NODE **nodes = map->nodes;
-                nodes[hashcode] = newNode;
-                return;
-            }else if(entry->hash == hashcode && entry->key == key){
-                fprintf(stderr, "put_hashmap update node hashcode=%d key=%d \n", hashcode,key);
-                entry->data = value;
-                return;
-            }else {
-                entry = entry->next;
-            }
+    NODE *headNode,*entry;
+    headNode = entry = (map->nodes)[hashcode];
+    
+    while (1){
+        if(entry == NULL){
+            fprintf(stderr, "put_hashmap insert node hashcode=%d key=%d \n", hashcode,key);
+            NODE *newNode = malloc(sizeof(NODE));
+            newNode->data = value;
+            newNode->hash = hashcode;
+            newNode->key = key;
+            newNode->next = headNode;
+            NODE **nodes = map->nodes;
+            nodes[hashcode] = newNode;
+            return;
+        }else if(entry->hash == hashcode && entry->key == key){
+            fprintf(stderr, "put_hashmap update node hashcode=%d key=%d \n", hashcode,key);
+            entry->data = value;
+            return;
+        }else {
+            entry = entry->next;
         }
     }
 }
@@ -55,22 +46,22 @@ void put_hashmap(MAP_INSTANCE *map ,int key,void *value){
 void *get_hashmap(MAP_INSTANCE *map ,int key){
     fprintf(stderr, "get_hashmap key=%d \n", key);
     int hashcode = hash(map,key);
-    NODE *headNode = (map->nodes)[hashcode];
-    if(headNode == NULL){
-        return NULL;
-    }else{
-        NODE *entry = headNode;
-        while(1){
-            fprintf(stderr, "entry hash=%d key=%d \n", entry->hash,entry->key);
-            if(entry == NULL){
-                return NULL;
-            }else if(entry->hash == hashcode && entry->key == key){
-                return entry->data;
-            }else{
-                entry = entry->next;
-            }
+    NODE *headNode,*entry;
+    headNode = entry = (map->nodes)[hashcode];
+    while(1){
+        fprintf(stderr, "entry hash=%d key=%d \n", entry->hash,entry->key);
+        if(entry == NULL){
+            return NULL;
+        }else if(entry->hash == hashcode && entry->key == key){
+            return entry->data;
+        }else{
+            entry = entry->next;
         }
     }
+}
+
+void delete_hashmap(MAP_INSTANCE *map, int key){
+
 }
 
 int hash(MAP_INSTANCE *map ,int key){

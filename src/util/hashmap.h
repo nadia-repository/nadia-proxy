@@ -22,6 +22,7 @@ hashmap对象结构
 typedef struct hashmap_struct{
     void (* put)(struct hashmap_struct *map ,int key,void *value);
     void * (* get)(struct hashmap_struct *map ,int key);
+    void (* delete)(struct hashmap_struct *map ,int key);
     unsigned int size;
     NODE **nodes;
 } MAP_INSTANCE;
@@ -46,6 +47,13 @@ void put_hashmap(MAP_INSTANCE *map ,int key,void *value);
     key
 */
 void *get_hashmap(MAP_INSTANCE *map ,int key);
+
+/*
+根据key删除hashcode
+    map hashmap对象
+    key
+*/
+void delete_hashmap(MAP_INSTANCE *map, int key);
 
 /*
 根据key计算hashcode
