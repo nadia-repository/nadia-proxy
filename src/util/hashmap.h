@@ -24,6 +24,7 @@ typedef struct hashmap_struct{
     void * (* get)(struct hashmap_struct *map ,int key);
     void (* delete)(struct hashmap_struct *map ,int key);
     unsigned int size;
+    unsigned int elements;
     NODE **nodes;
 } MAP_INSTANCE;
 

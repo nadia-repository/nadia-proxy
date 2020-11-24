@@ -7,6 +7,7 @@ MAP_INSTANCE *init_hashmap(unsigned int size){
     NODE **nodes = calloc(size,sizeof(NODE*));
     MAP_INSTANCE *map = malloc(sizeof(MAP_INSTANCE));
     map->size = size;
+    map->elements = 0;
     map->nodes = nodes;
     map->put = &put_hashmap;
     map->get = &get_hashmap;
@@ -31,6 +32,8 @@ void put_hashmap(MAP_INSTANCE *map ,int key,void *value){
             newNode->next = headNode;
             NODE **nodes = map->nodes;
             nodes[hashcode] = newNode;
+    
+            map->elements += 1;
             return;
         }else if(entry->hash == hashcode && entry->key == key){
             fprintf(stderr, "put_hashmap update node hashcode=%d key=%d \n", hashcode,key);
@@ -61,6 +64,11 @@ void *get_hashmap(MAP_INSTANCE *map ,int key){
 }
 
 void delete_hashmap(MAP_INSTANCE *map, int key){
+
+
+
+
+
 
 }
 

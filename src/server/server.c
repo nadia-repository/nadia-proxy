@@ -31,20 +31,20 @@ int main(int argc, char **argv, char **envp){
     }
     //初始化配置文件路径
     CP cp;
-    initFilePath(configPath,&cp);
+    init_file_path(configPath,&cp);
 
     //读取代理配置文件
-    if(loadProxy(cp.proxyPath,&cs) < 1){
+    if(load_proxy(cp.proxyPath,&cs) < 1){
         fprintf(stderr, "Nadia proxy file load faile<%s> \n", cp.proxyPath);
         exit(1);
     }
     //读取日志配置 todo
-    // if(loadLog(cp.logPath)<1){
+    // if(load_log(cp.logPath)<1){
     //     fprintf(stderr, "Nadia log file redirect faile<%s> \n", cp.logPath);
     //     exit(1);
     // }
     //读取配置信息配置
-    if(loadConfigs(cp.configsPath)<1){
+    if(load_configs(cp.configsPath)<1){
         fprintf(stderr, "Nadia config file load faile<%s> \n", cp.configsPath);
         exit(1);
     }
@@ -63,7 +63,7 @@ int main(int argc, char **argv, char **envp){
     SS ** servers = cs.servers;
     
     //key---value  ----> listenfd --- server
-    MAP_INSTANCE *lfdMap = init_hashmap(NULL);
+    // MAP_INSTANCE *lfdMap = init_hashmap(0);
 
     int *lfd = (int*)calloc(serverSize,sizeof(int)); //记录当前所有的监听文件描述符
     for(int i = 0;i<serverSize;i++,servers++){
@@ -72,13 +72,13 @@ int main(int argc, char **argv, char **envp){
         FD_SET(listenfd, &read_set);
         lfd[i] = listenfd;
         //维护listenfd 和 server的映射关系
-        lfdMap->put(lfdMap,listenfd,*servers);
+        // lfdMap->put(lfdMap,listenfd,*servers);
     }
 
     while (1){
         ready_set = read_set;
         Select(listenfd+1, &ready_set, NULL, NULL, NULL);
-
+         
         //todo 判断listenfd
         for(int i = 0;i<serverSize;i++){
             if (FD_ISSET(lfd[i] , &ready_set)){
@@ -97,7 +97,7 @@ int main(int argc, char **argv, char **envp){
 */
 void signal_handler(int sig) {
     fprintf(stderr, "stop nadia server\n");
-    freeProxy(&cs);
+    free_proxy(&cs);
     exit(0);
 }
 

@@ -78,17 +78,17 @@ retrun 1 或 0
 1: 读取配置成功
 0: 读取配置失败
 */
-int loadProxy(char *path, CS *cs);
+int load_proxy(char *path, CS *cs);
 
-void freeProxy(CS *cs);
+int load_log(char *path);
 
-int loadLog(char *path);
+int load_configs(char *path);
 
-int loadConfigs(char *path);
+void free_proxy(CS *cs);
 
 /*
 初始化配置文件路径
     dir 配置文件目录
     cp  配置文件路径结构
 */
-void initFilePath(char *dir,CP* cp);
+void init_file_path(char *dir,CP* cp);
