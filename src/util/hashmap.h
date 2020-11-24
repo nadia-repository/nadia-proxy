@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #define DEFAULT_INITIAL_CAPACITY 16
+#define DEFAULT_LOAD_FACTOR 0.75
 
 /*
 hashmap中node对象

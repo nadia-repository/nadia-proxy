@@ -40,32 +40,32 @@ void free_proxy(CS *cs){
 
 
 void mock_config(CS *cs){
-    SS **servers = malloc(sizeof(SS*) *2);
+    SS **servers = malloc(sizeof(SS*) *3);
 
     SS *server = malloc(sizeof(SS));
-    server->listen = "8888";
+    server->listen = "8701";
     server->locationSize = 0;
     servers[0] = server;
 
     server = malloc(sizeof(SS));
-    server->listen = "7777";
+    server->listen = "4321";
     server->locationSize = 0;
     servers[1] = server;
 
-    // server = malloc(sizeof(SS));
-    // server->listen = "80";
-    // server->locationSize = 1;
-    // servers[2] = server;
-    // LS lss[1];
-    // LS ls;
-    // ls.isStatic = 1;
-    // ls.path = "/";
-    // ls.root = "/Users/xiangshi/Documents/workspace_c/nadia-proxy/";
-    // lss[0] = ls;
-    // server->locations = (LS**)lss;
+    server = malloc(sizeof(SS));
+    server->listen = "80";
+    server->locationSize = 1;
+    servers[2] = server;
+    LS lss[1];
+    LS ls;
+    ls.isStatic = 1;
+    ls.path = "/";
+    ls.root = "/Users/xiangshi/Documents/workspace_c/nadia-proxy/";
+    lss[0] = ls;
+    server->locations = (LS**)lss;
 
     cs->servers = servers;
-    cs->serverSize = 2;
+    cs->serverSize = 3;
 }
 
 void init_file_path(char *dir,CP* cp){

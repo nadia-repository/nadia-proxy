@@ -47,12 +47,11 @@ void put_hashmap(MAP_INSTANCE *map ,int key,void *value){
 
 //todo 需要考虑并发安全
 void *get_hashmap(MAP_INSTANCE *map ,int key){
-    fprintf(stderr, "get_hashmap key=%d \n", key);
+    fprintf(stderr, "into get_hashmap key=%d \n", key);
     int hashcode = hash(map,key);
     NODE *headNode,*entry;
     headNode = entry = (map->nodes)[hashcode];
     while(1){
-        fprintf(stderr, "entry hash=%d key=%d \n", entry->hash,entry->key);
         if(entry == NULL){
             return NULL;
         }else if(entry->hash == hashcode && entry->key == key){
@@ -64,12 +63,23 @@ void *get_hashmap(MAP_INSTANCE *map ,int key){
 }
 
 void delete_hashmap(MAP_INSTANCE *map, int key){
-
-
-
-
-
-
+    fprintf(stderr, "into delete_hashmap key=%d \n", key);
+    int hashcode = hash(map,key);
+    NODE *pre,*entry;
+    pre = entry = (map->nodes)[hashcode];
+    while(1){
+        if(entry == NULL){
+            return;
+        }else if(entry->hash == hashcode && entry->key == key){
+            pre->next = entry->next;
+            free(entry);
+            map->elements -=1;
+            return;
+        }else{
+            pre = entry;
+            entry = entry->next;
+        }
+    }
 }
 
 int hash(MAP_INSTANCE *map ,int key){

@@ -994,8 +994,7 @@ int open_clientfd(char *hostname, char *port) {
  *       -1 with errno set for other errors.
  */
 /* $begin open_listenfd */
-int open_listenfd(char *port) 
-{
+int open_listenfd(char *port) {
     struct addrinfo hints, *listp, *p;
     int listenfd, rc, optval=1;
 
@@ -1004,7 +1003,7 @@ int open_listenfd(char *port)
     hints.ai_socktype = SOCK_STREAM;             /* Accept connections */
     hints.ai_flags = AI_PASSIVE | AI_ADDRCONFIG; /* ... on any IP address */
     hints.ai_flags |= AI_NUMERICSERV;            /* ... using port number */
-
+       
     if ((rc = getaddrinfo(NULL, port, &hints, &listp)) != 0) {
         fprintf(stderr, "getaddrinfo failed (port %s): %s\n", port, gai_strerror(rc));
         return -2;

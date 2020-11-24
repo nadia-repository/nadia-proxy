@@ -36,7 +36,7 @@ typedef struct location_struct{
     char *path;
     int isStatic;
     char *root;
-    PS *proxy;
+    PS **proxy;
 } LS;
 
 /*
