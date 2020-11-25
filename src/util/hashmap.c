@@ -1,5 +1,7 @@
 #include "hashmap.h"
 
+#define DEBUG_INFO 0
+
 MAP_INSTANCE *init_hashmap(unsigned int size){
     if(size <=0){
         size = DEFAULT_INITIAL_CAPACITY;
@@ -17,14 +19,16 @@ MAP_INSTANCE *init_hashmap(unsigned int size){
 
 //todo 需要考虑并发安全
 void put_hashmap(MAP_INSTANCE *map ,int key,void *value){
-    fprintf(stderr, "into put_hashmap key=%d \n", key);
+    if(DEBUG_INFO)
+        fprintf(stdout, "into put_hashmap key=%d \n", key);
     int hashcode = hash(map,key);
     NODE *headNode,*entry;
     headNode = entry = (map->nodes)[hashcode];
     
     while (1){
         if(entry == NULL){
-            fprintf(stderr, "put_hashmap insert node hashcode=%d key=%d \n", hashcode,key);
+            if(DEBUG_INFO)
+                fprintf(stdout, "put_hashmap insert node hashcode=%d key=%d \n", hashcode,key);
             NODE *newNode = malloc(sizeof(NODE));
             newNode->data = value;
             newNode->hash = hashcode;
@@ -36,7 +40,8 @@ void put_hashmap(MAP_INSTANCE *map ,int key,void *value){
             map->elements += 1;
             return;
         }else if(entry->hash == hashcode && entry->key == key){
-            fprintf(stderr, "put_hashmap update node hashcode=%d key=%d \n", hashcode,key);
+            if(DEBUG_INFO)
+                fprintf(stdout, "put_hashmap update node hashcode=%d key=%d \n", hashcode,key);
             entry->data = value;
             return;
         }else {
@@ -47,7 +52,8 @@ void put_hashmap(MAP_INSTANCE *map ,int key,void *value){
 
 //todo 需要考虑并发安全
 void *get_hashmap(MAP_INSTANCE *map ,int key){
-    fprintf(stderr, "into get_hashmap key=%d \n", key);
+    if(DEBUG_INFO)
+        fprintf(stdout, "into get_hashmap key=%d \n", key);
     int hashcode = hash(map,key);
     NODE *headNode,*entry;
     headNode = entry = (map->nodes)[hashcode];
@@ -63,7 +69,8 @@ void *get_hashmap(MAP_INSTANCE *map ,int key){
 }
 
 void delete_hashmap(MAP_INSTANCE *map, int key){
-    fprintf(stderr, "into delete_hashmap key=%d \n", key);
+    if(DEBUG_INFO)
+        fprintf(stdout, "into delete_hashmap key=%d \n", key);
     int hashcode = hash(map,key);
     NODE *pre,*entry;
     pre = entry = (map->nodes)[hashcode];

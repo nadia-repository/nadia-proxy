@@ -56,13 +56,13 @@ void mock_config(CS *cs){
     server->listen = "80";
     server->locationSize = 1;
     servers[2] = server;
-    LS lss[1];
-    LS ls;
-    ls.isStatic = 1;
-    ls.path = "/";
-    ls.root = "/Users/xiangshi/Documents/workspace_c/nadia-proxy/";
+    LS **lss = calloc(1,sizeof(LS *));
+    LS *ls = malloc(sizeof(LS));;
+    ls->isStatic = 1;
+    ls->path = "/";
+    ls->root = "/Users/xiangshi/Documents/workspace_c/nadia-proxy/";
     lss[0] = ls;
-    server->locations = (LS**)lss;
+    server->locations = lss;
 
     cs->servers = servers;
     cs->serverSize = 3;

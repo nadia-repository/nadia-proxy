@@ -9,39 +9,42 @@ void parser_request(int connfd,SS *server){
         return;
     }
     sscanf(buf, "%s %s %s", method, uri, version);
-    fprintf(stderr, "Server received method:%s uri:%s version:%s\n",method,uri,version);
+    fprintf(stdout, "Server received method:%s uri:%s version:%s\n",method,uri,version);
 
     SDS sds;
     if(match_proxy(method,uri,server,&sds)<1){
         clienterror(connfd, uri, "404", "Not found",
                     "Nadia couldn't find this page");
     }
-
-    if(sds.isStatic){
-        char filename[MAXLINE];
-        sprintf(filename,"/Users/xiangshi/Documents/workspace_c/nadia-proxy/");
-        sprintf(filename,"home.html");
-        if (stat(filename, &sbuf) < 0) {
-            clienterror(connfd, filename, "404", "Not found",
-                        "Nadia couldn't find this file");
-            return;
-        }  
-        serve_static(connfd,filename,sbuf.st_size);
-    }else {
-        read_requesthdrs(&rio); 
-    }
+    // fprintf(stdout, "Server do proxy is static=%d\n",sds.isStatic);
+    // if(sds.isStatic){
+    // //     char filename[MAXLINE];
+    // //     sprintf(filename,"/Users/xiangshi/Documents/workspace_c/nadia-proxy/");
+    // //     sprintf(filename,"home.html");
+    // //     if (stat(filename, &sbuf) < 0) {
+    // //         clienterror(connfd, filename, "404", "Not found",
+    // //                     "Nadia couldn't find this file");
+    // //         return;
+    // //     }  
+    // //     serve_static(connfd,filename,sbuf.st_size);
+    // } else {
+    //     read_requesthdrs(&rio); 
+    // }
 }
 
 int match_proxy(char *method,char *uri,SS *server,SDS *sds){
     LS ** locations = server->locations;
-    for(int i = 0;i<server->locationSize;i++){
+    for(int i = 0;i< (server->locationSize);i++){
         char *locationPath = (locations[i])->path;
+        fprintf(stdout, "Server do proxy is locationPath=%s \n",locationPath);
+
+        int isStatic = (locations[i])->isStatic;
+        fprintf(stdout, "Server do proxy is static=%d \n",isStatic);
 
         //todo 正则匹配
-        if((locations[i])->isStatic){
+        if(isStatic){
             //静态资源代理
             sds->isStatic = 1;
-            
 
             return 1;
         }else {
@@ -52,7 +55,7 @@ int match_proxy(char *method,char *uri,SS *server,SDS *sds){
 
             return 1;
         }
-
+        
     }
     return 0;
 }

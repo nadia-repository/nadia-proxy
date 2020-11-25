@@ -98,12 +98,11 @@ void *do_proxy(void *vargp){
     //根据listenfd获取代理信息
     int *lfp = (int*)vargp;
     SS *server = (SS *)(lfdMap->get(lfdMap,*lfp));
-
     clientlen = sizeof(struct sockaddr_storage); 
     connfd = Accept(*lfp, (SA *)&clientaddr, &clientlen);
     Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE,
         port, MAXLINE, 0);
-    printf("Accepted connection from (%s, %s)\n", hostname, port);
+    printf("Accepted connection from (%s, %s), listen port<%s>\n", hostname, port,server->listen);
     parser_request(connfd,server);
     Close(connfd);
     return NULL;
@@ -113,7 +112,7 @@ void *do_proxy(void *vargp){
 信号处理方法，回收内存并退出进程
 */
 void signal_handler(int sig) {
-    fprintf(stderr, "stop nadia server\n");
+    fprintf(stderr, "\nStop nadia server\n");
     free_proxy(&cs);
     exit(0);
 }
