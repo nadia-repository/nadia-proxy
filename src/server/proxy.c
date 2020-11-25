@@ -2,7 +2,7 @@
 
 void parser_request(int connfd,SS *server){
     rio_t rio;
-    struct stat sbuf;
+    
     char buf[MAXLINE], method[MAXLINE], uri[MAXLINE], version[MAXLINE];
     Rio_readinitb(&rio, connfd);
     if (!Rio_readlineb(&rio, buf, MAXLINE)){
@@ -16,20 +16,12 @@ void parser_request(int connfd,SS *server){
         clienterror(connfd, uri, "404", "Not found",
                     "Nadia couldn't find this page");
     }
-    // fprintf(stdout, "Server do proxy is static=%d\n",sds.isStatic);
-    // if(sds.isStatic){
-    // //     char filename[MAXLINE];
-    // //     sprintf(filename,"/Users/xiangshi/Documents/workspace_c/nadia-proxy/");
-    // //     sprintf(filename,"home.html");
-    // //     if (stat(filename, &sbuf) < 0) {
-    // //         clienterror(connfd, filename, "404", "Not found",
-    // //                     "Nadia couldn't find this file");
-    // //         return;
-    // //     }  
-    // //     serve_static(connfd,filename,sbuf.st_size);
-    // } else {
-    //     read_requesthdrs(&rio); 
-    // }
+    if(sds.isStatic){
+
+        serve_static(connfd,&sds);
+    } else {
+        read_requesthdrs(&rio); 
+    }
 }
 
 int match_proxy(char *method,char *uri,SS *server,SDS *sds){
@@ -45,6 +37,9 @@ int match_proxy(char *method,char *uri,SS *server,SDS *sds){
         if(isStatic){
             //静态资源代理
             sds->isStatic = 1;
+            sds->filePath = (locations[i])->root;
+            
+            sds->fileName = "home.html";
 
             return 1;
         }else {
@@ -60,38 +55,37 @@ int match_proxy(char *method,char *uri,SS *server,SDS *sds){
     return 0;
 }
 
-
-
-
-
-
-
-
-/*
-将服务器静态资源写入socket并返回给客户端
-    fd 连接文件描述符
-    filename 客户端请求的文件在服务端的真实路径
-    filesize 文件大小
-*/
-void serve_static(int fd, char *filename, int filesize) {
+void serve_static(int fd, SDS *sds) {
+    struct stat sbuf;
     int srcfd;
     char *srcp, filetype[MAXLINE], buf[MAXBUF];
+
+    char *file = (char *) malloc(strlen(sds->filePath) + strlen(sds->fileName));
+    strcpy(file,sds->filePath);
+    strcat(file,sds->fileName);
+  
+    if (stat(file, &sbuf) < 0) {
+        clienterror(fd, file, "404", "Not found",
+                    "Nadia couldn't find this file");
+        return;
+    }  
     //写入http头部信息
-    get_filetype(filename, filetype);    
+    get_filetype(file, filetype);    
     sprintf(buf, "HTTP/1.0 200 OK\r\n"); 
     Rio_writen(fd, buf, strlen(buf));
     sprintf(buf, "Server: Naida Web Server\r\n");
     Rio_writen(fd, buf, strlen(buf));
-    sprintf(buf, "Content-length: %d\r\n", filesize);
+    sprintf(buf, "Content-length: %d\r\n", (int)sbuf.st_size);
     Rio_writen(fd, buf, strlen(buf));
     sprintf(buf, "Content-type: %s\r\n\r\n", filetype);
     Rio_writen(fd, buf, strlen(buf));    
     //打开并映射文件，写回至客户端
-    srcfd = Open(filename, O_RDONLY, 0); 
-    srcp = Mmap(0, filesize, PROT_READ, MAP_PRIVATE, srcfd, 0); 
+    srcfd = Open(file, O_RDONLY, 0); 
+    srcp = Mmap(0, sbuf.st_size, PROT_READ, MAP_PRIVATE, srcfd, 0); 
     Close(srcfd);                       
-    Rio_writen(fd, srcp, filesize);     
-    Munmap(srcp, filesize);             
+    Rio_writen(fd, srcp, sbuf.st_size);     
+    Munmap(srcp, sbuf.st_size);       
+    Free(file);      
 }
 
 /*

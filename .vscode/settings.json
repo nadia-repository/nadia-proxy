@@ -7,6 +7,8 @@
         "locale": "c",
         "ostream": "c",
         "new": "c",
-        "__node_handle": "c"
+        "__node_handle": "c",
+        "sstream": "cpp",
+        "__config": "cpp"
     }
 }
