@@ -1,11 +1,11 @@
 #include "config.h"
 
-typedef struct static_dynamic_struct{
+typedef struct static_dynamic_INFO{
     int isStatic;
     char *fileName;
     char *filePath;
-    PS *proxy;
-} SDS;
+    DPS *dps;
+} SDI;
 
 
 /*
@@ -22,14 +22,14 @@ void parser_request(int connfd,SS *server);
     server 当前监听地址代理信息
     sds 代理目标
 */
-int match_proxy(char *method,char *uri,SS *server,SDS *sds);
+int match_proxy(char *method,char *uri,SS *server,SDI *sdi);
 
 /*
 进行静态代理，江景钛资源写回客户端
     fd 连接文件描述符
     sds 代理目标
 */
-void serve_static(int fd, SDS *sds);
+void serve_static(int fd, SDI *sdi);
 
 void read_requesthdrs(rio_t *rp);
 

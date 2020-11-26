@@ -11,24 +11,24 @@ void parser_request(int connfd,SS *server){
     sscanf(buf, "%s %s %s", method, uri, version);
     fprintf(stdout, "Server received method:%s uri:%s version:%s\n",method,uri,version);
 
-    SDS sds;
-    if(match_proxy(method,uri,server,&sds)<1){
+    SDI sdi;
+    if(match_proxy(method,uri,server,&sdi)<1){
         clienterror(connfd, uri, "404", "Not found",
                     "Nadia couldn't find this page");
     }
-    if(sds.isStatic){
+    if(sdi.isStatic){
 
-        serve_static(connfd,&sds);
+        serve_static(connfd,&sdi);
     } else {
         read_requesthdrs(&rio); 
     }
 }
 
-int match_proxy(char *method,char *uri,SS *server,SDS *sds){
+int match_proxy(char *method,char *uri,SS *server,SDI *sdi){
     LS ** locations = server->locations;
     for(int i = 0;i< (server->locationSize);i++){
-        char *locationPath = (locations[i])->path;
-        fprintf(stdout, "Server do proxy is locationPath=%s \n",locationPath);
+        char *pattern = (locations[i])->pattern;
+        fprintf(stdout, "Server do proxy is pattern=%s \n",pattern);
 
         int isStatic = (locations[i])->isStatic;
         fprintf(stdout, "Server do proxy is static=%d \n",isStatic);
@@ -36,15 +36,15 @@ int match_proxy(char *method,char *uri,SS *server,SDS *sds){
         //todo 正则匹配
         if(isStatic){
             //静态资源代理
-            sds->isStatic = 1;
-            sds->filePath = (locations[i])->root;
+            sdi->isStatic = 1;
+            sdi->filePath = (locations[i])->sps->root;
             
-            sds->fileName = "home.html";
+            sdi->fileName = "home.html";
 
             return 1;
         }else {
             //动态资源代理
-            sds->isStatic = 0;
+            sdi->isStatic = 0;
 
 
 
@@ -55,14 +55,14 @@ int match_proxy(char *method,char *uri,SS *server,SDS *sds){
     return 0;
 }
 
-void serve_static(int fd, SDS *sds) {
+void serve_static(int fd ,SDI *sdi) {
     struct stat sbuf;
     int srcfd;
     char *srcp, filetype[MAXLINE], buf[MAXBUF];
 
-    char *file = (char *) malloc(strlen(sds->filePath) + strlen(sds->fileName));
-    strcpy(file,sds->filePath);
-    strcat(file,sds->fileName);
+    char *file = (char *) malloc(strlen(sdi->filePath) + strlen(sdi->fileName));
+    strcpy(file,sdi->filePath);
+    strcat(file,sdi->fileName);
   
     if (stat(file, &sbuf) < 0) {
         clienterror(fd, file, "404", "Not found",

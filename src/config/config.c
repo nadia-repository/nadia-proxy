@@ -25,11 +25,15 @@ void free_proxy(CS *cs){
         fprintf(stderr, "free location size =%d \n",locationSize);
         for(int j = 0;j < locationSize;j++){
            LS *location = locations[j];
-            
-           PS *proxy = location->proxy;
-           char **proxyServer = proxy->server;
-           Free(proxyServer);
-           Free(proxy);
+           if(location->dps != NULL){
+               Free(location->dps->server);
+               Free(location->dps);
+           }
+           if(location->sps != NULL){
+               Free(location->sps->alias);
+               Free(location->sps->root); 
+               Free(location->sps); 
+           }
            Free(location);
         }
         Free(locations);
@@ -59,12 +63,12 @@ void mock_config(CS *cs){
     LS **lss = calloc(1,sizeof(LS *));
     LS *ls = malloc(sizeof(LS));;
     ls->isStatic = 1;
-    ls->path = "/";
+    // ls->path = "/";
     #ifdef __APPLE__
-        ls->root = "/Users/xiangshi/Documents/workspace_c/nadia-proxy/";
+        // ls->root = "/Users/xiangshi/Documents/workspace_c/nadia-proxy/";
 
     #else
-        ls->root = "/workspace_c/nadia-proxy/";
+        // ls->root = "/workspace_c/nadia-proxy/";
     #endif
     lss[0] = ls;
     server->locations = lss;

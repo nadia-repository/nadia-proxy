@@ -16,14 +16,33 @@
 enum strategy {loop,ip};
 
 /*
+location匹配规则
+    exact 精确匹配，修饰符=
+    prefix 前缀匹配，修饰符^~
+    regex 正则匹配,修饰符，区分大小写~，不区分大小写~*
+    none  无修饰符前缀匹配，无修饰符
+*/
+enum match_type {exact,prefix,regex,none};
+
+/*
 动态代理信息
     proxyStrategy 负责均衡策略
     server 代理服务列表
 */
-typedef struct proxy_struct{
+typedef struct dynamic_proxy_struct{
     enum strategy proxyStrategy;
     char **server;
-} PS;
+} DPS;
+
+/*
+静态代理信息
+    alias 重命名目录
+    root 文件目录
+*/
+typedef struct static_proxy_struct{
+    char *alias;
+    char *root;
+} SPS;
 
 /*
 代理信息
@@ -33,10 +52,11 @@ typedef struct proxy_struct{
     proxy 动态代理信息
 */
 typedef struct location_struct{
-    char *path;
+    char *pattern;
+    enum match_type matchType;
     int isStatic;
-    char *root;
-    PS *proxy;
+    SPS *sps;
+    DPS *dps;
 } LS;
 
 /*
