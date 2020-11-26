@@ -79,7 +79,7 @@ void delete_hashmap(MAP_INSTANCE *map, int key){
             return;
         }else if(entry->hash == hashcode && entry->key == key){
             pre->next = entry->next;
-            free(entry);
+            Free(entry);
             map->elements -=1;
             return;
         }else{

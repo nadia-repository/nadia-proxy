@@ -1,14 +1,14 @@
 #include "proxy.h"
 #include "hashmap.h"
 #include "thread.h"
+#include "worker.c"
 
 #define DEBUG_LOG 0
 
+CP cp;
 CS cs;
-TS ts;
-MAP_INSTANCE *lfdMap;
 void signal_handler(int sig);
-void *do_proxy(void *vargp);
+void create_work_process();
 
 int main(int argc, char **argv, char **envp){
 
@@ -28,7 +28,6 @@ int main(int argc, char **argv, char **envp){
         }
     }
     //初始化配置文件路径
-    CP cp;
     init_file_path(configPath,&cp);
 
     //读取代理配置文件
@@ -53,70 +52,21 @@ int main(int argc, char **argv, char **envp){
     Signal(SIGTSTP, signal_handler); /* ctrl-z */
     Signal(SIGPIPE, SIG_IGN);//屏蔽SIGPIPE信号，如果服务端向一个已经关闭的客户端发送两次数据，服务端将会受到SIGPIPE信号并终止服务端进程
 
-    int listenfd=0;
-    fd_set read_set, ready_set;
-    FD_ZERO(&read_set);
+    //创建子进程处理网络请求
+    create_work_process();
 
-    __int16_t serverSize = cs.serverSize;
-    SS ** servers = cs.servers;
+    while (1){}
     
-    //key---value  ----> listenfd --- server
-    lfdMap = init_hashmap(0);
-
-    //记录当前所有的监听文件描述符
-    int *lfd = (int*)calloc(serverSize,sizeof(int)); 
-
-    for(int i = 0;i<serverSize;i++,servers++){
-        listenfd = Open_listenfd((*servers)->listen);
-        fprintf(stderr, "start listen port<%s> \n", (*servers)->listen);
-        FD_SET(listenfd, &read_set);
-        lfd[i] = listenfd;
-        //维护listenfd 和 server的映射关系
-        lfdMap->put(lfdMap,listenfd,*servers);
-    }
-
-    //初始化工作线程池，工作线程处理每个客户端发来的请求
-    init_pthread_pool(&ts,10,serverSize,do_proxy);
-
-    while (1){
-        ready_set = read_set;
-        Select(listenfd+1, &ready_set, NULL, NULL, NULL);
-         
-        //todo 判断listenfd
-        for(int i = 0;i<serverSize;i++){
-            if (FD_ISSET(lfd[i] , &ready_set)){
-                int *item = (int *)malloc(sizeof(int)); //开辟单独内存空间，防止并发覆盖
-                *item = lfd[i];
-                put_pthread_item(&ts,item);
-            }
-        }
-    }
     fprintf(stdout, "Main process stop nadia server\n");
     return 0;
 }
 
-void *do_proxy(void *vargp){
-    fprintf(stdout, "Start proxy worker(%d)\n",*((int *)vargp));
-    pthread_detach(pthread_self());//分离自己，防止被其他线程中断
-    while(1){
-        int *lfp = (int *)get_pthread_item(&ts);
-        fprintf(stdout, "====================get item=%d \n",*lfp);
-        int connfd;
-        char hostname[MAXLINE], port[MAXLINE];
-        socklen_t clientlen;
-        struct sockaddr_storage clientaddr;
-
-        //根据listenfd获取代理信息
-        SS *server = (SS *)(lfdMap->get(lfdMap,*lfp));
-        clientlen = sizeof(struct sockaddr_storage); 
-        connfd = Accept(*lfp, (SA *)&clientaddr, &clientlen);
-        Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE,
-            port, MAXLINE, 0);
-        printf("Accepted connection from (%s, %s), listen port<%s>\n", hostname, port,server->listen);
-        parser_request(connfd,server);
-        Close(connfd);
+void create_work_process(){
+    pid_t workPid;
+    if((workPid = Fork())==0){
+        fprintf(stderr, "start worker pid<%d> \n", workPid);
+        do_work();
     }
-    return NULL;
 }
 
 /*
@@ -124,7 +74,7 @@ void *do_proxy(void *vargp){
 */
 void signal_handler(int sig) {
     fprintf(stderr, "\nStop nadia server\n");
-    free_proxy(&cs);
-    destroy_pthoread_pool(&ts);
+    // free_proxy(&cs);
+    // destroy_pthoread_pool(&ts);
     exit(0);
 }
