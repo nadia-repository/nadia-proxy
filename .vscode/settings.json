@@ -9,6 +9,9 @@
         "new": "c",
         "__node_handle": "c",
         "sstream": "cpp",
-        "__config": "cpp"
+        "__config": "cpp",
+        "__functional_03": "cpp",
+        "functional": "cpp",
+        "__threading_support": "c"
     }
 }

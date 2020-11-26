@@ -1,9 +1,11 @@
 #include "proxy.h"
 #include "hashmap.h"
+#include "thread.h"
 
 #define DEBUG_LOG 0
 
 CS cs;
+TS ts;
 MAP_INSTANCE *lfdMap;
 void signal_handler(int sig);
 void *do_proxy(void *vargp);
@@ -61,7 +63,9 @@ int main(int argc, char **argv, char **envp){
     //key---value  ----> listenfd --- server
     lfdMap = init_hashmap(0);
 
-    int *lfd = (int*)calloc(serverSize,sizeof(int)); //记录当前所有的监听文件描述符
+    //记录当前所有的监听文件描述符
+    int *lfd = (int*)calloc(serverSize,sizeof(int)); 
+
     for(int i = 0;i<serverSize;i++,servers++){
         listenfd = Open_listenfd((*servers)->listen);
         fprintf(stderr, "start listen port<%s> \n", (*servers)->listen);
@@ -71,6 +75,9 @@ int main(int argc, char **argv, char **envp){
         lfdMap->put(lfdMap,listenfd,*servers);
     }
 
+    //初始化工作线程池，工作线程处理每个客户端发来的请求
+    init_pthread_pool(&ts,10,serverSize,do_proxy);
+
     while (1){
         ready_set = read_set;
         Select(listenfd+1, &ready_set, NULL, NULL, NULL);
@@ -78,33 +85,34 @@ int main(int argc, char **argv, char **envp){
         //todo 判断listenfd
         for(int i = 0;i<serverSize;i++){
             if (FD_ISSET(lfd[i] , &ready_set)){
-                //todo 根据lfd[i] listenfd 获取server信息
-                pthread_t tid[10];//todo需要实现线程池
-                Pthread_create(&tid[i], NULL, do_proxy, &lfd[i]);
+                put_pthread_item(&ts,&lfd[i]);
             }
         }
     }
-    fprintf(stderr, "main process stop nadia server\n");
+    fprintf(stdout, "Main process stop nadia server\n");
     return 0;
 }
 
 void *do_proxy(void *vargp){
     pthread_detach(pthread_self());//分离自己，防止被其他线程中断
-    int connfd;
-    char hostname[MAXLINE], port[MAXLINE];
-    socklen_t clientlen;
-    struct sockaddr_storage clientaddr;
+    while(1){
+        get_pthread_item(&ts);
+        int connfd;
+        char hostname[MAXLINE], port[MAXLINE];
+        socklen_t clientlen;
+        struct sockaddr_storage clientaddr;
 
-    //根据listenfd获取代理信息
-    int *lfp = (int*)vargp;
-    SS *server = (SS *)(lfdMap->get(lfdMap,*lfp));
-    clientlen = sizeof(struct sockaddr_storage); 
-    connfd = Accept(*lfp, (SA *)&clientaddr, &clientlen);
-    Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE,
-        port, MAXLINE, 0);
-    printf("Accepted connection from (%s, %s), listen port<%s>\n", hostname, port,server->listen);
-    parser_request(connfd,server);
-    Close(connfd);
+        //根据listenfd获取代理信息
+        int *lfp = (int*)vargp;
+        SS *server = (SS *)(lfdMap->get(lfdMap,*lfp));
+        clientlen = sizeof(struct sockaddr_storage); 
+        connfd = Accept(*lfp, (SA *)&clientaddr, &clientlen);
+        Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE,
+            port, MAXLINE, 0);
+        printf("Accepted connection from (%s, %s), listen port<%s>\n", hostname, port,server->listen);
+        parser_request(connfd,server);
+        Close(connfd);
+    }
     return NULL;
 }
 
@@ -114,5 +122,6 @@ void *do_proxy(void *vargp){
 void signal_handler(int sig) {
     fprintf(stderr, "\nStop nadia server\n");
     free_proxy(&cs);
+    destroy_pthoread_pool(&ts);
     exit(0);
 }
