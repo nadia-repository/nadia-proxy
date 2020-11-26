@@ -1,21 +1,21 @@
 #include "thread.h"
 
-void init_pthread_pool(TS *ts,unsigned int workers,unsigned int tasks, void *handler){
-    ts->tasks = Calloc(tasks,sizeof(void *));
-    ts->maxTaskNum = tasks;
+void init_pthread_pool(TS *ts,unsigned int workers,unsigned int maxTaskNum, void *handler){
+    ts->compartments = Calloc(maxTaskNum,sizeof(void *));
+    ts->maxTaskNum = maxTaskNum;
     ts->front = ts->rear = 0;
     ts->workers = workers;
     #ifdef __APPLE__
-        ts->mutex = sem_open("/mutex",O_CREAT, S_IRUSR | S_IWUSR, 1);
-        ts->slots = sem_open("/slots",O_CREAT, S_IRUSR | S_IWUSR, tasks);
-        ts->items = sem_open("/items",O_CREAT, S_IRUSR | S_IWUSR, 0);
+        ts->mutex = sem_open("mutex",O_CREAT, S_IRUSR | S_IWUSR, 1);
+        ts->slots = sem_open("slots",O_CREAT, S_IRUSR | S_IWUSR, maxTaskNum);
+        ts->tasks = sem_open("items",O_CREAT, S_IRUSR | S_IWUSR, 0);
     #else
         ts->mutex = (sem_t*)malloc(sizeof(sem_t));
         Sem_init(ts->mutex, 0, 1);
         ts->slots = (sem_t*)malloc(sizeof(sem_t));
-        Sem_init(ts->slots, 0, tasks);
-        ts->items = (sem_t*)malloc(sizeof(sem_t));
-        Sem_init(ts->items, 0, 0);
+        Sem_init(ts->slots, 0, maxTaskNum);
+        ts->tasks = (sem_t*)malloc(sizeof(sem_t));
+        Sem_init(ts->tasks, 0, 0);
     #endif
 
     pthread_t tid[workers];
@@ -26,27 +26,27 @@ void init_pthread_pool(TS *ts,unsigned int workers,unsigned int tasks, void *han
     }
 }
 
-void put_pthread_item(TS *ts,void *item){
+void put_pthread_item(TS *ts,void *task){
     P(ts->slots);
     P(ts->mutex);
     int index = (++ts->rear)%(ts->maxTaskNum);
-    ts->tasks[index] = item;
+    ts->compartments[index] = task;
     V(ts->mutex);
-    V(ts->items);
+    V(ts->tasks);
 }
 
 void *get_pthread_item(TS *ts){
     void *item;
-    P(ts->items);
+    P(ts->tasks);
     P(ts->mutex);
     int index = (++ts->front)%(ts->maxTaskNum);
-    item = ts->tasks[index];
+    item = ts->compartments[index];
     V(ts->mutex);
     V(ts->slots);
     return item;
 }
 
 void destroy_pthoread_pool(TS *ts){
-    Free(ts->tasks);
+    Free(ts->compartments);
     Free(ts);
 }

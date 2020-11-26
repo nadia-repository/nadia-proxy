@@ -13,6 +13,7 @@
         "__functional_03": "cpp",
         "functional": "cpp",
         "__threading_support": "c",
-        "__mutex_base": "c"
+        "__mutex_base": "c",
+        "string": "c"
     }
 }

@@ -60,7 +60,12 @@ void mock_config(CS *cs){
     LS *ls = malloc(sizeof(LS));;
     ls->isStatic = 1;
     ls->path = "/";
-    ls->root = "/Users/xiangshi/Documents/workspace_c/nadia-proxy/";
+    #ifdef __APPLE__
+        ls->root = "/Users/xiangshi/Documents/workspace_c/nadia-proxy/";
+
+    #else
+        ls->root = "/workspace_c/nadia-proxy/";
+    #endif
     lss[0] = ls;
     server->locations = lss;
 
