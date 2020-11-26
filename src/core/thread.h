@@ -1,14 +1,14 @@
 #include "csapp.h"
 
 typedef struct thread_struct{
-    int **tasks;
+    void **tasks;
     int maxTaskNum;
     int front;
     int rear;
     int workers;
-    sem_t mutex;
-    sem_t slots;
-    sem_t items;
+    sem_t *mutex;
+    sem_t *slots;
+    sem_t *items;
 } TS;
 
 

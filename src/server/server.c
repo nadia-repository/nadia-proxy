@@ -85,7 +85,9 @@ int main(int argc, char **argv, char **envp){
         //todo 判断listenfd
         for(int i = 0;i<serverSize;i++){
             if (FD_ISSET(lfd[i] , &ready_set)){
-                put_pthread_item(&ts,&lfd[i]);
+                int *item = (int *)malloc(sizeof(int)); //开辟单独内存空间，防止并发覆盖
+                *item = lfd[i];
+                put_pthread_item(&ts,item);
             }
         }
     }
@@ -94,16 +96,17 @@ int main(int argc, char **argv, char **envp){
 }
 
 void *do_proxy(void *vargp){
+    fprintf(stdout, "Start proxy worker(%d)\n",*((int *)vargp));
     pthread_detach(pthread_self());//分离自己，防止被其他线程中断
     while(1){
-        get_pthread_item(&ts);
+        int *lfp = (int *)get_pthread_item(&ts);
+        fprintf(stdout, "====================get item=%d \n",*lfp);
         int connfd;
         char hostname[MAXLINE], port[MAXLINE];
         socklen_t clientlen;
         struct sockaddr_storage clientaddr;
 
         //根据listenfd获取代理信息
-        int *lfp = (int*)vargp;
         SS *server = (SS *)(lfdMap->get(lfdMap,*lfp));
         clientlen = sizeof(struct sockaddr_storage); 
         connfd = Accept(*lfp, (SA *)&clientaddr, &clientlen);

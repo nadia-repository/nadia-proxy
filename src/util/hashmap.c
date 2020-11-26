@@ -55,8 +55,8 @@ void *get_hashmap(MAP_INSTANCE *map ,int key){
     if(DEBUG_INFO)
         fprintf(stdout, "into get_hashmap key=%d \n", key);
     int hashcode = hash(map,key);
-    NODE *headNode,*entry;
-    headNode = entry = (map->nodes)[hashcode];
+    NODE *entry;
+    entry = (map->nodes)[hashcode];
     while(1){
         if(entry == NULL){
             return NULL;

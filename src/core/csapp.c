@@ -720,22 +720,19 @@ void Pthread_once(pthread_once_t *once_control, void (*init_function)()) {
  * Wrappers for Posix semaphores
  *******************************/
 
-void Sem_init(sem_t *sem, int pshared, unsigned int value) 
-{
+void Sem_init(sem_t *sem, int pshared, unsigned int value) {
     if (sem_init(sem, pshared, value) < 0)
-	unix_error("Sem_init error");
+	    unix_error("Sem_init error");
 }
 
-void P(sem_t *sem) 
-{
+void P(sem_t *sem) {
     if (sem_wait(sem) < 0)
-	unix_error("P error");
+	    unix_error("P error");
 }
 
-void V(sem_t *sem) 
-{
+void V(sem_t *sem) {
     if (sem_post(sem) < 0)
-	unix_error("V error");
+	    unix_error("V error");
 }
 
 /****************************************
@@ -1060,7 +1057,7 @@ int Open_listenfd(char *port)
     int rc;
 
     if ((rc = open_listenfd(port)) < 0){
-        char msg[MAXLINE] = "Open_listenfd error with port<%s>";
+        char msg[MAXLINE] = "Open_listenfd error with port<%s> \n";
         sprintf(msg,msg,port);
 	    unix_error(msg);
     }

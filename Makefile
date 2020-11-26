@@ -7,11 +7,14 @@ LIB = -lpthread
 
 all: server
 
-server: src/server/server.c src/server/proxy.c csapp.o hashmap.o config.o
-	$(CC) $(CFLAGS) -o server src/server/server.c src/server/proxy.c csapp.o hashmap.o config.o -I src/config -I src/core -I src/util $(LIB)
+server: src/server/server.c src/server/proxy.c csapp.o thread.o hashmap.o config.o
+	$(CC) $(CFLAGS) -o server src/server/server.c src/server/proxy.c csapp.o thread.o hashmap.o config.o -I src/config -I src/core -I src/util $(LIB)
 
 csapp.o: src/core/csapp.c
 	$(CC) $(CFLAGS) -c src/core/csapp.c
+
+thread.o: src/core/thread.c
+	$(CC) $(CFLAGS) -c src/core/thread.c
 
 hashmap.o: src/util/hashmap.c
 	$(CC) $(CFLAGS) -c src/util/hashmap.c
@@ -19,7 +22,5 @@ hashmap.o: src/util/hashmap.c
 config.o: src/config/config.c csapp.o
 	$(CC) $(CFLAGS) -c src/config/config.c csapp.o -I src/core
 	
-
-
 clean:
 	rm -f *.o server *~
