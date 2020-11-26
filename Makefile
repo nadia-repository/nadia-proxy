@@ -7,8 +7,8 @@ LIB = -lpthread
 
 all: server
 
-server: src/server/server.c src/server/proxy.c csapp.o thread.o hashmap.o config.o
-	$(CC) $(CFLAGS) -o server src/server/server.c src/server/proxy.c csapp.o thread.o hashmap.o config.o -I src/config -I src/core -I src/util $(LIB)
+server: src/server/server.c src/server/proxy.c src/server/worker.c csapp.o thread.o hashmap.o config.o
+	$(CC) $(CFLAGS) -o server src/server/server.c src/server/proxy.c src/server/worker.c csapp.o thread.o hashmap.o config.o -I src/config -I src/core -I src/util $(LIB)
 
 csapp.o: src/core/csapp.c
 	$(CC) $(CFLAGS) -c src/core/csapp.c
