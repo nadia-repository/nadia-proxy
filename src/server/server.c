@@ -4,7 +4,6 @@ NADIA_CONFIG nadiaConfig;
 pid_t workPid;
 
 void signal_handler(int sig);
-void reap_child_handler(int sig);
 
 static void usage(void);
 static void shotdown(void);
@@ -46,13 +45,21 @@ void signal_handler(int sig) {
     exit(0);
 }
 
-void reap_child_handler(int sig){
+void reap_worker(){
     pid_t pid;
-    while ((pid = waitpid(-1, NULL, 0)) > 0){
-        fire();
+    int status;
+    while(1){
+        while ((pid = waitpid(-1, &status, 0)) > 0){
+            if(!WIFEXITED(status) || (WIFEXITED(status) && WEXITSTATUS(status)==1){
+                fire(); //工作进程异常终止,或者由于reload终止时，重新拉起工作线程
+            }else {
+                exit(0);
+            }
+        }
+        if (errno != ECHILD)
+            unix_error("waitpid error");
     }
-    if (errno != ECHILD)
-	    unix_error("waitpid error");
+
 }
 
 /*
@@ -100,13 +107,13 @@ static void launch(void){
     load();
     //处理信号
     Signal(SIGINT, signal_handler);   /* ctrl-c */
-    Signal(SIGCHLD, reap_child_handler);  //回收工作进程。1.工作进程异常终止时重新拉起；2.重新加载配置后，主动杀死工作进程后拉起新的工作进程
     Signal(SIGTSTP, signal_handler); /* ctrl-z */
     Signal(SIGPIPE, SIG_IGN);//屏蔽SIGPIPE信号，如果服务端向一个已经关闭的客户端发送两次数据，服务端将会受到SIGPIPE信号并终止服务端进程
     //启动工作进程
     fire();
+    //回收工作进程&重新拉起工作进程
+    reap_worker();
 
-    while (1){}
     fprintf(stdout, "Main process stop nadia server\n");
 }
 

@@ -4,9 +4,16 @@ TS thread_pool_instance;
 extern NADIA_CONFIG nadiaConfig;
 MAP_INSTANCE *lfdMap;
 
+void reload_handler(int sig);
+void stop_handler(int sig);
 void *do_proxy(void *vargp);
 
 void do_work(){
+
+    //处理来自主进程的信号
+    Signal(SIGINT, reload_handler);   /* ctrl-c */
+    Signal(SIGINT, stop_handler);   /* ctrl-c */
+
     int listenfd=0;
     fd_set read_set, ready_set;
     FD_ZERO(&read_set);
@@ -70,4 +77,14 @@ void *do_proxy(void *vargp){
         Close(connfd);
     }
     return NULL;
+}
+
+void reload_handler(int sig){
+
+    exit(1);
+}
+
+void stop_handler(int sig){
+
+    exit(0);
 }
