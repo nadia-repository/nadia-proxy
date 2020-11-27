@@ -126,7 +126,7 @@ static void reload(void){
 }
 
 static void shotdown(void){
-
+    Kill(workPid,SIGTSTP);
 }
 
 /*
