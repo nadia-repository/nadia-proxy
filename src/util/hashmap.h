@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "constant.h"
 
 #define DEFAULT_INITIAL_CAPACITY 16
 #define DEFAULT_LOAD_FACTOR 0.75

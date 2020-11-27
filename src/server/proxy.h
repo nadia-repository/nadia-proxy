@@ -1,6 +1,6 @@
 #include "config.h"
 
-typedef struct static_dynamic_INFO{
+typedef struct static_dynamic_info{
     int isStatic;
     char *fileName;
     char *filePath;

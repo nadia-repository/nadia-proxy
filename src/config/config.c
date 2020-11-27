@@ -1,83 +1,28 @@
 #include "config.h"
 
-void mock_config(CS *cs);
+static void init_file_path();
 
-int load_proxy(char *path, CS *cs){
-    fprintf(stderr, "start load nadia config file from<%s> \n", path);
-    #ifdef IS_MOCK
-        fprintf(stderr, "Load procy configs from mock \n");
-        mock_config(cs);
-        return 1;
-    #else
+int load_nadia_config(char *dir,NADIA_CONFIG *config){
 
-        return 0;
-    #endif
+    init_file_path(dir);
+
+    //加载基础配置
+    CS *cs = (CS *)malloc(sizeof(CS));
+    load_configs(dir,cs);
+
+    //加载代理配置
+    PCS *pcs = (PCS *)malloc(sizeof(PCS));
+    load_proxy(dir,pcs);
+
+    //日志文件映射
+
+    config->cs = cs;
+    config->pcs = pcs;
+    return 1;
+
 }
 
-void free_proxy(CS *cs){
-    SS **servers = cs->servers;
-    __int16_t serversSize = cs->serverSize;
-    fprintf(stderr, "free servers size =%d \n",serversSize);
-    for(int i = 0;i < serversSize;i++){
-        SS *server = servers[i];
-        LS **locations = server->locations;
-        __int16_t locationSize = server->locationSize;
-        fprintf(stderr, "free location size =%d \n",locationSize);
-        for(int j = 0;j < locationSize;j++){
-           LS *location = locations[j];
-           if(location->dps != NULL){
-               Free(location->dps->server);
-               Free(location->dps);
-           }
-           if(location->sps != NULL){
-               Free(location->sps->alias);
-               Free(location->sps->root); 
-               Free(location->sps); 
-           }
-           Free(location);
-        }
-        Free(locations);
-        Free(server);
-    }
-    Free(servers);
-}
-
-
-void mock_config(CS *cs){
-    SS **servers = malloc(sizeof(SS*) *3);
-
-    SS *server = malloc(sizeof(SS));
-    server->listen = "8701";
-    server->locationSize = 0;
-    servers[0] = server;
-
-    server = malloc(sizeof(SS));
-    server->listen = "4321";
-    server->locationSize = 0;
-    servers[1] = server;
-
-    server = malloc(sizeof(SS));
-    server->listen = "80";
-    server->locationSize = 1;
-    servers[2] = server;
-    LS **lss = calloc(1,sizeof(LS *));
-    LS *ls = malloc(sizeof(LS));;
-    ls->isStatic = 1;
-    // ls->path = "/";
-    #ifdef __APPLE__
-        // ls->root = "/Users/xiangshi/Documents/workspace_c/nadia-proxy/";
-
-    #else
-        // ls->root = "/workspace_c/nadia-proxy/";
-    #endif
-    lss[0] = ls;
-    server->locations = lss;
-
-    cs->servers = servers;
-    cs->serverSize = 3;
-}
-
-void init_file_path(char *dir,CP* cp){
+static void init_file_path(char *dir){
     // char buf[MAXBUF];
     // sprintf(buf,dir);
     // sprintf(buf,"proxy.conf");
@@ -105,11 +50,6 @@ int load_log(char *path){
     if(Dup2(errorfd,STDERR_FILENO)<0){
         return 0;
     }
-
-    return 1;
-}
-
-int load_configs(char *path){
 
     return 1;
 }

@@ -1,10 +1,9 @@
-#include "proxy.h"
-#include "hashmap.h"
-#include "thread.h"
+#include "worker.h"
 
-TS ts;
-extern CP cp;
-extern CS cs;
+TS thread_pool_instance;
+extern NADIA_CONFIG nadiaConfig;
+MAP_INSTANCE *lfdMap;
+
 void *do_proxy(void *vargp);
 
 void do_work(){
@@ -12,11 +11,11 @@ void do_work(){
     fd_set read_set, ready_set;
     FD_ZERO(&read_set);
 
-    __int16_t serverSize = cs.serverSize;
-    SS ** servers = cs.servers;
+    uint16_t serverSize = nadiaConfig.pcs->serverSize;
+    SS ** servers = nadiaConfig.pcs->servers;
     
     //key---value  ----> listenfd --- server
-    MAP_INSTANCE *lfdMap = init_hashmap(0);
+    lfdMap = init_hashmap(0);
 
     //记录当前所有的监听文件描述符
     int *lfd = (int*)calloc(serverSize,sizeof(int)); 
@@ -31,7 +30,7 @@ void do_work(){
     }
 
     //初始化工作线程池，工作线程处理每个客户端发来的请求
-    init_pthread_pool(&ts,10,serverSize,do_proxy);
+    init_pthread_pool(&thread_pool_instance,10,serverSize,do_proxy);
 
     while (1){
         ready_set = read_set;
@@ -42,7 +41,7 @@ void do_work(){
             if (FD_ISSET(lfd[i] , &ready_set)){
                 int *item = (int *)malloc(sizeof(int)); //开辟单独内存空间，防止并发覆盖
                 *item = lfd[i];
-                put_pthread_item(&ts,item);
+                put_pthread_item(&thread_pool_instance,item);
             }
         }
     }
@@ -53,7 +52,7 @@ void *do_proxy(void *vargp){
     fprintf(stdout, "Start proxy worker(%d)\n",*((int *)vargp));
     pthread_detach(pthread_self());//分离自己，防止被其他线程中断
     while(1){
-        int *lfp = (int *)get_pthread_item(&ts);
+        int *lfp = (int *)get_pthread_item(&thread_pool_instance);
         fprintf(stdout, "====================get item=%d \n",*lfp);
         int connfd;
         char hostname[MAXLINE], port[MAXLINE];

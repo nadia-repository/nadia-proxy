@@ -14,6 +14,9 @@
         "functional": "cpp",
         "__threading_support": "c",
         "__mutex_base": "c",
-        "string": "c"
+        "string": "c",
+        "algorithm": "c",
+        "ctime": "c",
+        "__locale": "c"
     }
 }

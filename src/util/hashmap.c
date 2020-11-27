@@ -1,7 +1,5 @@
 #include "hashmap.h"
 
-#define DEBUG_INFO 0
-
 MAP_INSTANCE *init_hashmap(unsigned int size){
     if(size <=0){
         size = DEFAULT_INITIAL_CAPACITY;
@@ -79,7 +77,7 @@ void delete_hashmap(MAP_INSTANCE *map, int key){
             return;
         }else if(entry->hash == hashcode && entry->key == key){
             pre->next = entry->next;
-            Free(entry);
+            free(entry);
             map->elements -=1;
             return;
         }else{
