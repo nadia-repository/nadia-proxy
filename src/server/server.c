@@ -44,7 +44,6 @@ void signal_handler(int sig) {
     // free_proxy(&cs);
     // destroy_pthoread_pool(&ts);
     shotdown();
-    exit(0);
 }
 
 void main_reload_handler(int sig){
@@ -58,7 +57,7 @@ void reap_worker(){
     pid_t pid;
     int status;
     while(1){
-        while ((pid = waitpid(workPid, &status, 0)) > 0){
+        while ((pid = waitpid(-1, &status, 0)) > 0){
             fprintf(stdout, "Reap worker status=%d\n",status);
             if(!WIFEXITED(status) || 
                 (WIFEXITED(status) && WEXITSTATUS(status)==1)){
@@ -106,12 +105,12 @@ static void launch(void){
     fprintf(stderr, "Wellcome Naida Proxy \n");
     //加载配置
     load();
+    //启动工作进程
+    fire();
     //处理信号
     Signal(SIGINT, signal_handler);   /* ctrl-c */
     Signal(SIGTSTP, signal_handler); /* ctrl-z */
     Signal(SIGPIPE, SIG_IGN);//屏蔽SIGPIPE信号，如果服务端向一个已经关闭的客户端发送两次数据，服务端将会受到SIGPIPE信号并终止服务端进程
-    //启动工作进程
-    fire();
     //回收工作进程&重新拉起工作进程
     reap_worker();
 
