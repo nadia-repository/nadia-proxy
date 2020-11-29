@@ -4,6 +4,7 @@ NADIA_CONFIG nadiaConfig;
 pid_t workPid;
 
 void signal_handler(int sig);
+void main_reload_handler(int sig);
 
 static void usage(void);
 static void shotdown(void);
@@ -39,38 +40,38 @@ int main(int argc, char **argv, char **envp){
 信号处理方法，回收内存并退出进程
 */
 void signal_handler(int sig) {
-    fprintf(stderr, "\nStop nadia server\n");
+    fprintf(stdout, "\nStop nadia server\n");
     // free_proxy(&cs);
     // destroy_pthoread_pool(&ts);
+    shotdown();
     exit(0);
 }
 
+void main_reload_handler(int sig){
+    fprintf(stdout, "\n main_reload_handler \n");
+    load();
+    Kill(workPid,SIGTSTP);
+}
+
 void reap_worker(){
+    fprintf(stdout, "Start reap worker process \n");
     pid_t pid;
     int status;
     while(1){
-        while ((pid = waitpid(-1, &status, 0)) > 0){
-            if(!WIFEXITED(status) || (WIFEXITED(status) && WEXITSTATUS(status)==1){
+        while ((pid = waitpid(workPid, &status, 0)) > 0){
+            fprintf(stdout, "Reap worker status=%d\n",status);
+            if(!WIFEXITED(status) || 
+                (WIFEXITED(status) && WEXITSTATUS(status)==1)){
+                fprintf(stdout, "Reap worker and reFire worker process  status=%d\n",status);
                 fire(); //工作进程异常终止,或者由于reload终止时，重新拉起工作线程
             }else {
+                fprintf(stdout, "Reap worker stop main process  status=%d\n",status);
                 exit(0);
             }
         }
         if (errno != ECHILD)
             unix_error("waitpid error");
     }
-
-}
-
-/*
-重新加载信号处理
-*/
-void reload_handler(){
-    //重新加载配置
-
-    //停止现有工作进程
-
-    //启动新工作进程
 
 }
 
@@ -121,12 +122,13 @@ static void reload(void){
     //检查当前nadia proxy主进程是否存在
 
     //存在时向nadia proxy主进程发送重新加载信号
-
+    
     //不存在时启动服务
 }
 
 static void shotdown(void){
-    Kill(workPid,SIGTSTP);
+    fprintf(stdout, "Start shotdown workPid=%d \n", workPid);
+    Kill(workPid,SIGILL);
 }
 
 /*
@@ -136,5 +138,5 @@ static void fire(void){
     if((workPid = Fork())==0){
         do_work();
     }
-    fprintf(stderr, "start worker pid<%d> \n", workPid);
+    fprintf(stdout, "start worker pid<%d> \n", workPid);
 }

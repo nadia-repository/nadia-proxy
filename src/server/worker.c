@@ -11,8 +11,8 @@ void *do_proxy(void *vargp);
 void do_work(){
 
     //处理来自主进程的信号
-    Signal(SIGINT, reload_handler);   /* ctrl-c */
-    Signal(SIGINT, stop_handler);   /* ctrl-c */
+    Signal(SIGTSTP, reload_handler);   /* ctrl-c */
+    Signal(SIGILL, stop_handler);   /* ctrl-c */
 
     int listenfd=0;
     fd_set read_set, ready_set;
@@ -85,6 +85,6 @@ void reload_handler(int sig){
 }
 
 void stop_handler(int sig){
-
+    fprintf(stdout, "Worker process get stop single!\n");
     exit(0);
 }
