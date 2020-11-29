@@ -9,6 +9,7 @@ void stop_handler(int sig);
 void *do_proxy(void *vargp);
 
 void do_work(){
+    prctl(PR_SET_NAME, "nadia worker", NULL, NULL, NULL);
 
     //处理来自主进程的信号
     Signal(SIGTSTP, reload_handler);   /* ctrl-c */
@@ -79,11 +80,17 @@ void *do_proxy(void *vargp){
     return NULL;
 }
 
+/*
+主进程向工作进程发起重启信号，工作进程首先退出进程。主进程回收工作进程后重新fork工作线程。
+*/
 void reload_handler(int sig){
-
+    fprintf(stdout, "Worker process get reload single!\n");
     exit(1);
 }
 
+/*
+主进程向工作进程发起停止信号，工作进程首先退出进程。主进程回收工作进程后退出主进程。
+*/
 void stop_handler(int sig){
     fprintf(stdout, "Worker process get stop single!\n");
     exit(0);
