@@ -17,48 +17,41 @@ void free_proxy(PCS *pcs){
     SS **servers = pcs->servers;
     uint16_t serversSize = pcs->serverSize;
     fprintf(stderr, "free servers size =%d \n",serversSize);
-    for(int i = 0;i < serversSize;i++){
-        SS *server = servers[i];
-        LS **locations = server->locations;
-        uint16_t locationSize = server->locationSize;
-        fprintf(stderr, "free location size =%d \n",locationSize);
-        for(int j = 0;j < locationSize;j++){
-           LS *location = locations[j];
-           if(location->dps != NULL){
-               Free(location->dps->server);
-               Free(location->dps);
-           }
-           if(location->sps != NULL){
-               Free(location->sps->alias);
-               Free(location->sps->root); 
-               Free(location->sps); 
-           }
-           Free(location);
-        }
-        Free(locations);
-        Free(server);
-    }
+    // for(int i = 0;i < serversSize;i++){
+    //     SS *server = servers[i];
+    //     LS **locations = server->locations;
+    //     uint16_t locationSize = server->locationSize;
+    //     fprintf(stderr, "free location size =%d \n",locationSize);
+    //     for(int j = 0;j < locationSize;j++){
+    //        LS *location = locations[j];
+    //        if(location->dps != NULL){
+    //            Free(location->dps->server);
+    //            Free(location->dps);
+    //        }
+    //        if(location->sps != NULL){
+    //            Free(location->sps->alias);
+    //            Free(location->sps->root); 
+    //            Free(location->sps); 
+    //        }
+    //        Free(location);
+    //     }
+    //     Free(locations);
+    //     Free(server);
+    // }
     Free(servers);
 }
 
 
 static void mock_config(PCS *pcs){
-    SS **servers = malloc(sizeof(SS*) *3);
+    SS **servers = malloc(sizeof(SS*) *1);
 
-    SS *server = malloc(sizeof(SS));
-    server->listen = "8701";
-    server->locationSize = 0;
-    servers[0] = server;
-
-    server = malloc(sizeof(SS));
-    server->listen = "4321";
-    server->locationSize = 0;
-    servers[1] = server;
-
+    SS *server;
     server = malloc(sizeof(SS));
     server->listen = "80";
-    server->locationSize = 1;
-    servers[2] = server;
+
+    MAP_INSTANCE * map = init_hashmap(0);
+    LMS *lms = malloc(sizeof(LMS));
+    lms->locationSize = 1;
     LS **lss = calloc(1,sizeof(LS *));
     LS *ls = malloc(sizeof(LS));;
     ls->isStatic = 1;
@@ -72,8 +65,12 @@ static void mock_config(PCS *pcs){
     #endif
     ls->sps = sps;
     lss[0] = ls;
-    server->locations = lss;
+    lms->locations = lss;
+    map->put(map,EXACT,lms);
+
+    server->locMap = map;
+    servers[0] = server;
 
     pcs->servers = servers;
-    pcs->serverSize = 3;
+    pcs->serverSize = 1;
 }

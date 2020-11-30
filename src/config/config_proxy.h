@@ -1,12 +1,13 @@
 #include "csapp.h"
 #include "constant.h"
+#include "hashmap.h"
 
 /*
 反向代理负载均衡策略
     loop:轮训
     random:随机
 */
-enum strategy {loop,ip};
+enum strategy {LOOP,IP,RANDOM};
 
 /*
 location匹配规则
@@ -15,7 +16,7 @@ location匹配规则
     regex 正则匹配,修饰符，区分大小写~，不区分大小写~*
     none  无修饰符前缀匹配，无修饰符
 */
-enum match_type {exact,prefix,regex,none};
+enum match_type {EXACT,PREFIX,REGEX,NONE};
 
 /*
 动态代理信息
@@ -52,15 +53,37 @@ typedef struct location_struct{
     DPS *dps;
 } LS;
 
+
+/*
+匹配规则对应的代理信息
+    locationSize 代理数量
+    locations 代理信息列表
+*/
+typedef struct location_map_struct{
+    uint16_t locationSize;
+    LS **locations;
+} LMS;
+
+
 /*
 服务信息
     listen 服务器监听端口
-    locations 监听端口代理信息
+    locMap 监听端口代理信息
+        EXACT  -|- locationSize
+                |- locations
+        
+        PREFIX -|- locationSize
+                |- locations
+
+        REGEX  -|- locationSize
+                |- locations
+
+        NONE   -|- locationSize
+                |- locations
 */
 typedef struct server_struct{
     char *listen;
-    __int16_t locationSize;
-    LS **locations;
+    MAP_INSTANCE *locMap;
 } SS;
 
 /*

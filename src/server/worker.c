@@ -9,11 +9,14 @@ void stop_handler(int sig);
 void *do_proxy(void *vargp);
 
 void do_work(){
-    prctl(PR_SET_NAME, "nadia worker", NULL, NULL, NULL);
+    #ifdef __Linux__
+        prctl(PR_SET_NAME, "nadia worker", NULL, NULL, NULL);
+    #endif
 
     //处理来自主进程的信号
-    Signal(SIGTSTP, reload_handler);   /* ctrl-c */
-    Signal(SIGILL, stop_handler);   /* ctrl-c */
+    Signal(SIGTSTP, reload_handler);
+    Signal(SIGUSR1, stop_handler);
+    Signal(SIGINT, SIG_IGN);
 
     int listenfd=0;
     fd_set read_set, ready_set;

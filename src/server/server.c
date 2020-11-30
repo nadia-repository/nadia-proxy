@@ -8,10 +8,12 @@ void main_reload_handler(int sig);
 
 static void usage(void);
 static void shotdown(void);
-static void load(void);
 static void launch(void);
 static void reload(void);
+
+static void load(void);
 static void fire(void);
+static void reap_worker(void);
 
 int main(int argc, char **argv){
     char c;
@@ -56,7 +58,7 @@ static void launch(void){
     //处理信号
     Signal(SIGINT, signal_handler);   /* ctrl-c */
     Signal(SIGTSTP, signal_handler); /* ctrl-z */
-    Signal(SIGILL, signal_handler);   /* ctrl-c */
+    Signal(SIGQUIT, main_reload_handler);   /* ctrl-c */
     Signal(SIGPIPE, SIG_IGN);//屏蔽SIGPIPE信号，如果服务端向一个已经关闭的客户端发送两次数据，服务端将会受到SIGPIPE信号并终止服务端进程
     //回收工作进程&重新拉起工作进程
     reap_worker();
@@ -70,7 +72,7 @@ static void reload(void){
     //检查当前nadia proxy主进程是否存在
 
     //存在时向nadia proxy主进程发送重新加载信号
-    Kill(workPid,SIGUSER1);
+    Kill(workPid,SIGQUIT);
 }
 
 /*
@@ -79,7 +81,7 @@ static void reload(void){
 static void shotdown(void){
     fprintf(stdout, "Start shotdown workPid=%d \n", workPid);
     //停止工作进程，主线程回收工作进程后退出
-    Kill(workPid,SIGILL);
+    Kill(workPid,SIGUSR1);
 }
 
 /************************************************************************启动命令相关 end*/
@@ -115,7 +117,7 @@ void main_reload_handler(int sig){
     1.工作线程非正常退出，或者正常退出状态为1（重启服务）时，重新拉起工作进程
     2.工作线程退出后，退出主进程
 */
-void reap_worker(){
+static void reap_worker(void){
     fprintf(stdout, "Start reap worker process \n");
     pid_t pid;
     int status;

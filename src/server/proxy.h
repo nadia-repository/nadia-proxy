@@ -1,4 +1,5 @@
 #include "config.h"
+#include "match.h"
 
 typedef struct static_dynamic_info{
     int isStatic;

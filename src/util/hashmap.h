@@ -1,3 +1,6 @@
+#ifndef  HASHMAP_H 
+#define HASHMAP_H 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "constant.h"
@@ -70,3 +73,5 @@ int hash(MAP_INSTANCE *map, int key);
     map hashmap对象
 */
 void resize(MAP_INSTANCE *map);
+
+#endif 
