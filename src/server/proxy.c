@@ -35,7 +35,7 @@ int match_proxy(char *method,char *uri,SS *server,SDI *sdi){
     LMS *exactLocation = (LMS *)server->locMap->get(server->locMap,EXACT);
     if(exactLocation != NULL){
         //do精确匹配
-        if(match_location(uri,exactLocation,sdi,&exact_match)){
+        if(match_location(uri,exactLocation,sdi,&exact_match) > 0){
             //匹配成功
             return 1;
         }
@@ -84,13 +84,10 @@ static int match_location(char *uri, LMS *lms, SDI *sdi, int (*routine)(char *,c
     uint16_t locationSize = lms->locationSize;
     LS **locations = lms->locations;
 
-    char fileName[MAXLINE],uriPath[MAXLINE];
-    pares_uri(uri,fileName,uriPath);
-
     int i;
     for(i = 0 ; i < locationSize ; i++){
         char *pattern = (locations[i])->pattern;
-        if(routine(pattern,uriPath)){
+        if(routine(pattern,uri)){
             sdi->isStatic = (locations[i])->isStatic;
             if(sdi->isStatic){
                 //静态代理

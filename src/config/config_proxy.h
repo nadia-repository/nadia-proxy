@@ -36,6 +36,7 @@ typedef struct dynamic_proxy_struct{
 typedef struct static_proxy_struct{
     char *alias;
     char *root;
+    char *index;
 } SPS;
 
 /*

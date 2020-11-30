@@ -8,8 +8,15 @@ int exact_match(char *pattern,char *target){
 }
 
 int prefix_match(char *pattern,char *target){
-
-    return 1;
+    int cnt;
+    char *pa = pattern;
+    char *ta = target;
+    while((*pa != '\0' && *ta != '\0') && (*pa == *ta)){
+        pa++;
+        ta++;
+        cnt++;
+    }
+    return cnt;
 
 }
 
@@ -31,6 +38,5 @@ int regex_match(char *pattern,char *target){
 }
 
 int none_match(char *pattern,char *target){
-
-    return 1;
+    return prefix_match(pattern,target);
 }

@@ -63,10 +63,11 @@ static void mock_config(PCS *pcs){
     #else
         sps->root = "/workspace_c/nadia-proxy/";
     #endif
+    sps->index = "index.html";
     ls->sps = sps;
     lss[0] = ls;
     lms->locations = lss;
-    map->put(map,EXACT,lms);
+    map->put(map,NONE,lms);
 
     server->locMap = map;
     servers[0] = server;
