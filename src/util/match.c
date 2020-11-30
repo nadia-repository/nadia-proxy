@@ -1,20 +1,10 @@
 #include "match.h"
 
 int exact_match(char *pattern,char *target){
-    // regex_t compiled;
-
-    // regcomp(&compiled,pattern,REG_EXTENDED);
-
-    // regmatch_t pmatch[1];
-    // int status = regexex(&compiled,target,1,pmatch,REG_NOTEOL);
-    // if(status == REG_NOMATCH){
-    //     return 0;
-    // }else {
-        
-    // }
-
-    // regfree(&compiled);
-    return 1;
+    if(strcmp(pattern,target)==0){
+        return 1;
+    }
+    return 0;
 }
 
 int prefix_match(char *pattern,char *target){
@@ -24,7 +14,19 @@ int prefix_match(char *pattern,char *target){
 }
 
 int regex_match(char *pattern,char *target){
+    regex_t compiled;
 
+    regcomp(&compiled,pattern,REG_EXTENDED);
+
+    regmatch_t pmatch[1];
+    int status = regexex(&compiled,target,1,pmatch,REG_NOTEOL);
+    if(status == REG_NOMATCH){
+        return 0;
+    }else {
+        
+    }
+
+    regfree(&compiled);
     return 1;
 }
 

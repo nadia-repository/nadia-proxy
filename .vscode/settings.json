@@ -17,6 +17,7 @@
         "string": "c",
         "algorithm": "c",
         "ctime": "c",
-        "__locale": "c"
+        "__locale": "c",
+        "cstring": "c"
     }
 }
