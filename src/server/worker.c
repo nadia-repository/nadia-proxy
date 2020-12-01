@@ -9,7 +9,7 @@ void stop_handler(int sig);
 void *do_proxy(void *vargp);
 
 void do_work(){
-    #ifdef __Linux__
+    #ifdef __linux__
         prctl(PR_SET_NAME, "nadia worker", NULL, NULL, NULL);
     #endif
 
