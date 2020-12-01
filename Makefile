@@ -7,39 +7,51 @@ LIB = -lpthread
 
 all: server
 
-server: src/server/server.c src/server/proxy.c src/server/worker.c csapp.o thread.o config.o config_configs.o config_proxy.o hashmap.o match.o
-	$(CC) $(CFLAGS) -o nadia \
-	src/server/server.c \
-	src/server/proxy.c \
-	src/server/worker.c \
+server: src/server/server.c proxy.o proxy_common.o proxy_static.o proxy_dynamic.o  match.o hashmap.o csapp.o thread.o config.o config_configs.o config_proxy.o  worker.o
+	$(CC) $(CFLAGS) -o nadia src/server/server.c \
+	match.o \
+	hashmap.o \
 	csapp.o \
 	thread.o \
 	config.o \
 	config_configs.o \
 	config_proxy.o \
-	hashmap.o \
-	match.o \
+	proxy.o \
+	proxy_common.o \
+	proxy_static.o \
+	proxy_dynamic.o \
+	worker.o \
 	-I src/util \
 	-I src/config \
 	-I src/core \
+	-I src/proxy \
 	$(LIB)
 	rm -f *.o
 
-csapp.o: src/core/csapp.c
-	$(CC) $(CFLAGS) -c src/core/csapp.c
+worker.o: src/server/worker.c 
+	$(CC) $(CFLAGS) -c src/server/worker.c -I src/config -I src/core -I src/util -I src/proxy
+
+proxy.o: src/proxy/proxy.c src/proxy/proxy_common.c src/proxy/proxy_static.c src/proxy/proxy_dynamic.c
+	$(CC) $(CFLAGS) -c src/proxy/proxy.c src/proxy/proxy_common.c src/proxy/proxy_static.c src/proxy/proxy_dynamic.c -I src/config -I src/core -I src/util
+
+# proxy.o: src/proxy/proxy_common.c 
+# 	$(CC) $(CFLAGS) -c src/proxy/proxy_common.c  -I src/config -I src/core -I src/util
+
+config.o: src/config/config.c src/config/config_configs.c src/config/config_proxy.c 
+	$(CC) $(CFLAGS) -c src/config/config.c src/config/config_configs.c src/config/config_proxy.c  -I src/core -I src/util
 
 thread.o: src/core/thread.c
 	$(CC) $(CFLAGS) -c src/core/thread.c
 
-hashmap.o: src/util/hashmap.c
-	$(CC) $(CFLAGS) -c src/util/hashmap.c -I src/core
-
 match.o: src/util/match.c
 	$(CC) $(CFLAGS) -c src/util/match.c
 
-config.o: src/config/config.c src/config/config_configs.c src/config/config_proxy.c hashmap.o csapp.o
-	$(CC) $(CFLAGS) -c src/config/config.c src/config/config_configs.c src/config/config_proxy.c hashmap.o csapp.o -I src/core -I src/util
+csapp.o: src/core/csapp.c
+	$(CC) $(CFLAGS) -c src/core/csapp.c
 	
+hashmap.o: src/util/hashmap.c
+	$(CC) $(CFLAGS) -c src/util/hashmap.c -I src/core
+
 clean:
 	rm -f *.o nadia *~
 	

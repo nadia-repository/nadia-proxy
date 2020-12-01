@@ -97,6 +97,16 @@ typedef struct proxy_config_struct{
 } PCS;
 
 /*
+静态代理&动态代理信息
+
+*/
+typedef struct static_dynamic_info{
+    int isStatic;
+    char *path;
+    DPS *dps;
+} SDI;
+
+/*
 根据文件路径加载Proxy配置文件
 retrun 1 或 0
 1: 读取配置成功

@@ -1057,8 +1057,8 @@ int Open_listenfd(char *port)
     int rc;
 
     if ((rc = open_listenfd(port)) < 0){
-        char msg[MAXLINE] = "Open_listenfd error with port<%s> \n";
-        sprintf(msg,msg,port);
+        char msg[MAXLINE];
+        sprintf(msg,"Open_listenfd error with port<%s> \n",port);
 	    unix_error(msg);
     }
     return rc;
