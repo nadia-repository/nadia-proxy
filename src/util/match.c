@@ -8,7 +8,7 @@ int exact_match(char *pattern,char *target){
 }
 
 int prefix_match(char *pattern,char *target){
-    int cnt;
+    int cnt=0;
     char *pa = pattern;
     char *ta = target;
     while((*pa != '\0' && *ta != '\0') && (*pa == *ta)){
@@ -26,11 +26,11 @@ int regex_match(char *pattern,char *target){
     regcomp(&compiled,pattern,REG_EXTENDED);
 
     regmatch_t pmatch[1];
-    int status = regexex(&compiled,target,1,pmatch,REG_NOTEOL);
+    int status = regexec(&compiled,target,1,pmatch,REG_NOTEOL);
     if(status == REG_NOMATCH){
         return 0;
     }else {
-        
+        return 2;
     }
 
     regfree(&compiled);

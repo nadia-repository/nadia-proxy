@@ -61,9 +61,9 @@ static void mock_config(PCS *pcs){
         sps->root = "/Users/xiangshi/Documents/workspace_c/nadia-proxy/";
 
     #else
-        sps->root = "/workspace_c/nadia-proxy/";
+        sps->root = "/workspace_c/nadia-proxy";
     #endif
-    sps->index = "index.html";
+    sps->index = "home.html";
     ls->sps = sps;
     lss[0] = ls;
     lms->locations = lss;

@@ -2,7 +2,7 @@
 
 static int match_location(char *uri, LMS *lms, SDI *sdi, int (*routine)(char *,char *));
 static void pares_uri(char *uri,char *fileName, char *uriPath);
-
+static void request_static(int fd, char *filename, int filesize);
 
 void parser_request(int connfd,SS *server){
     rio_t rio;
@@ -91,18 +91,21 @@ static int match_location(char *uri, LMS *lms, SDI *sdi, int (*routine)(char *,c
             sdi->isStatic = (locations[i])->isStatic;
             if(sdi->isStatic){
                 //静态代理
+                char path[MAXBUF];
                 if((locations[i])->sps->alias != NULL){
                     //1.alias = alias + fileName
-                    sdi->filePath = (locations[i])->sps->alias;
+                    strcpy(path,(locations[i])->sps->alias);
                 }else {
                     //2.root = root + uri + fileName
-                    char path[MAXBUF];
                     strcpy(path,(locations[i])->sps->root);
-                    strcat(path,uriPath);
-                    sdi->filePath = path;
+                    strcat(path,uri);
                 }
-                sdi->fileName = fileName;
+                if((locations[i])->sps->index != NULL){
+                    strcat(path,(locations[i])->sps->index);
+                }
+                sdi->path = path;
             }else {
+                //动态代理
                 sdi->dps = (locations[i])->dps;
             }
             return 1;
@@ -120,36 +123,40 @@ static void pares_uri(char *uri,char *fileName, char *uriPath){
 
 void serve_static(int fd ,SDI *sdi) {
     struct stat sbuf;
-    int srcfd;
-    char *srcp, filetype[MAXLINE], buf[MAXBUF];
 
-    char *file = (char *) malloc(strlen(sdi->filePath) + strlen(sdi->fileName));
-    strcpy(file,sdi->filePath);
-    strcat(file,sdi->fileName);
-  
-    if (stat(file, &sbuf) < 0) {
-        clienterror(fd, file, "404", "Not found",
+    fprintf(stdout, "Server static file=%s\n",sdi->path);
+    if (stat(sdi->path, &sbuf) < 0) {
+        clienterror(fd, sdi->path, "404", "Not found",
                     "Nadia couldn't find this file");
         return;
     }  
+    request_static(fd,sdi->path,(int)sbuf.st_size);
+}
+
+static void request_static(int fd, char *filename, int filesize){
+    int srcfd;
+    char *srcp, filetype[MAXLINE], buf[MAXBUF];
     //写入http头部信息
-    get_filetype(file, filetype);    
+    get_filetype(filename, filetype);    
     sprintf(buf, "HTTP/1.0 200 OK\r\n"); 
     Rio_writen(fd, buf, strlen(buf));
     sprintf(buf, "Server: Naida Web Server\r\n");
     Rio_writen(fd, buf, strlen(buf));
-    sprintf(buf, "Content-length: %d\r\n", (int)sbuf.st_size);
+    sprintf(buf, "Content-length: %d\r\n", filesize);
     Rio_writen(fd, buf, strlen(buf));
     sprintf(buf, "Content-type: %s\r\n\r\n", filetype);
     Rio_writen(fd, buf, strlen(buf));    
     //打开并映射文件，写回至客户端
-    srcfd = Open(file, O_RDONLY, 0); 
-    srcp = Mmap(0, sbuf.st_size, PROT_READ, MAP_PRIVATE, srcfd, 0); 
+    fprintf(stdout, "Open static file=%s\n",filename);
+    srcfd = Open(filename, O_RDONLY, 0); 
+    srcp = Mmap(0, filesize, PROT_READ, MAP_PRIVATE, srcfd, 0); 
     Close(srcfd);                       
-    Rio_writen(fd, srcp, sbuf.st_size);     
-    Munmap(srcp, sbuf.st_size);       
-    Free(file);      
+    Rio_writen(fd, srcp, filesize);     
+    Munmap(srcp, filesize);       
+    Free(filename);      
 }
+
+
 
 /*
 服务端文件不存在时返回错误页

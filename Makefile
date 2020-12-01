@@ -42,3 +42,4 @@ config.o: src/config/config.c src/config/config_configs.c src/config/config_prox
 	
 clean:
 	rm -f *.o nadia *~
+	

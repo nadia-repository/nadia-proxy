@@ -1,4 +1,5 @@
 #include <regex.h>
+#include <string.h>
 
 /*
 匹配代理路径

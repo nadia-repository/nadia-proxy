@@ -32,7 +32,7 @@
 void unix_error(char *msg) /* Unix-style error */
 {
     fprintf(stderr, "%s: %s\n", msg, strerror(errno));
-    exit(0);
+    // exit(0);
 }
 /* $end unixerror */
 
@@ -441,7 +441,7 @@ void *Mmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset)
 void Munmap(void *start, size_t length) 
 {
     if (munmap(start, length) < 0)
-	unix_error("munmap error");
+	    unix_error("munmap error");
 }
 
 /***************************************************

@@ -3,8 +3,7 @@
 
 typedef struct static_dynamic_info{
     int isStatic;
-    char *fileName;
-    char *filePath;
+    char *path;
     DPS *dps;
 } SDI;
 
