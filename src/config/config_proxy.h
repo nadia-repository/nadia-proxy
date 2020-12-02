@@ -9,7 +9,7 @@
     RANDOM 随机
     HASH 哈希
 */
-enum strategy {ROUND_ROBIN,WEIGHTED_ROUND_ROBIN,RANDOM,HASH};
+enum strategy {ROUND_ROBIN,WEIGHTED_ROUND_ROBIN,IP_HASH};
 
 /*
 location匹配规则
@@ -120,6 +120,7 @@ typedef struct static_dynamic_info{
     int isStatic;
     char *path;
     char *method;
+    char *uri;
     char *version;
     int connfd;
     rio_t rio;

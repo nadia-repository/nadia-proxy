@@ -17,6 +17,7 @@ void parser_request(int connfd,SS *server){
     //开始匹配代理信息
     SDI sdi;
     sdi.method = method;
+    sdi.uri = uri;
     sdi.version = version;
     sdi.connfd = connfd;
     sdi.rio = rio;

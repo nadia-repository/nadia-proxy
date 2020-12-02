@@ -1,22 +1,18 @@
 #include "proxy_dynamic.h"
 
-static void read_requesthdrs(rio_t *rp);
-static void request_dynamic(char *host, char *port);
+static void request_dynamic(char *host, char *port, SDI *sdi);
 static void select_server(char *host, char *port, DPS *dps);
 
 static void do_round_robin(char *host, char *port, DPS *dps);
 static void do_weighted_round_robin(char *host, char *port, DPS *dps);
-static void do_random(char *host, char *port, DPS *dps);
-static void do_hash(char *host, char *port, DPS *dps);
+static void do_ip_hash(char *host, char *port, DPS *dps);
 
 
 
 void serve_dynamic(SDI *sdi){
     char *host, *port;
-    
     select_server(host,port,sdi->dps);
-    
-    request_dynamic(host,port);
+    request_dynamic(host,port,sdi);
 }
 
 static void select_server(char *host, char *port, DPS *dps){
@@ -27,10 +23,7 @@ static void select_server(char *host, char *port, DPS *dps){
         case(WEIGHTED_ROUND_ROBIN):
             do_weighted_round_robin(host,port,dps);
             break;
-        case(RANDOM):
-            do_random(host,port,dps);
-            break;
-        case(HASH):
+        case(IP_HASH):
             do_hash(host,port,dps);
             break;
         default:
@@ -46,38 +39,32 @@ static void do_round_robin(char *host, char *port, DPS *dps){
 }
 
 static void do_weighted_round_robin(char *host, char *port, DPS *dps){
-
+    //todo
 }
 
-static void do_random(char *host, char *port, DPS *dps){
-
-}
-
-static void do_hash(char *host, char *port, DPS *dps){
-
-}
-
-
-static void read_requesthdrs(rio_t *rp) {
-    char buf[MAXLINE];
-    //需要解析length等信息，并且需要缓存
-    Rio_readlineb(rp, buf, MAXLINE);
-    printf("%s", buf);
-    while (strcmp(buf, "\r\n")) {          //line:netp:readhdrs:checkterm
-        Rio_readlineb(rp, buf, MAXLINE);
-        printf("%s", buf);
+static void do_ip_hash(char *host, char *port, DPS *dps){
+    int hash;
+    char c,*h=host;
+    while((c = *h) != '\0'){
+        hash += atoi(c);
     }
-    return;
+    DPI *info = (dps->proxyInfos)[hash % dps->size];
+    strcpy(host,info->host);
+    strcpy(port,info->port);
 }
 
-static void request_dynamic(char *host, char *port){
+static void request_dynamic(char *host, char *port, SDI *sdi){
     rio_t rio;
-    int clientfd;
+    int proxyClientfd;
     char buf[MAXLINE];
 
-    clientfd = Open_clientfd(host, port);
+    proxyClientfd = Open_clientfd(host, port);
 
-    Rio_writen(clientfd, buf, strlen(buf));
-
-    Close(clientfd);
+    sprintf(buf, "%s %s %s\r\n",sdi->method,sdi->uri,sdi->version); 
+    Rio_writen(proxyClientfd, buf, strlen(buf));
+    Rio_readlineb(sdi->rio, buf, MAXLINE);
+    while (strcmp(buf, "\r\n")) { 
+        Rio_readlineb(sdi->rio, buf, MAXLINE);
+    }
+    Close(proxyClientfd);
 }
