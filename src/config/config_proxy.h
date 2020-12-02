@@ -21,13 +21,27 @@ location匹配规则
 enum match_type {EXACT,PREFIX,REGEX,NONE};
 
 /*
+代理主机信息
+    host 主机地址
+    port 主机端口
+    weight 权重
+*/
+typedef struct dynamic_proxy_info{
+    char *host;
+    char *port;
+    int weight;
+} DPI;
+
+/*
 动态代理信息
     proxyStrategy 负责均衡策略
     server 代理服务列表
 */
 typedef struct dynamic_proxy_struct{
     enum strategy proxyStrategy;
-    char **server;
+    int size;
+    DPI **proxyInfos;
+    int count;
 } DPS;
 
 /*

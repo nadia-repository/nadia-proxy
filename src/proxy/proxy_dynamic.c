@@ -4,10 +4,11 @@ static void read_requesthdrs(rio_t *rp);
 static void request_dynamic(char *host, char *port);
 static void select_server(char *host, char *port, DPS *dps);
 
-static void do_round_robin(char *host, char *port, char **server);
-static void do_weighted_round_robin(char *host, char *port, char **server);
-static void do_random(char *host, char *port, char **server);
-static void do_hash(char *host, char *port, char **server);
+static void do_round_robin(char *host, char *port, DPS *dps);
+static void do_weighted_round_robin(char *host, char *port, DPS *dps);
+static void do_random(char *host, char *port, DPS *dps);
+static void do_hash(char *host, char *port, DPS *dps);
+
 
 
 void serve_dynamic(SDI *sdi){
@@ -21,35 +22,38 @@ void serve_dynamic(SDI *sdi){
 static void select_server(char *host, char *port, DPS *dps){
     switch (dps->proxyStrategy){
         case(ROUND_ROBIN):
-            do_round_robin(host,port,dps->server);
+            do_round_robin(host,port,dps);
             break;
         case(WEIGHTED_ROUND_ROBIN):
-            do_weighted_round_robin(host,port,dps->server);
+            do_weighted_round_robin(host,port,dps);
             break;
         case(RANDOM):
-            do_random(host,port,dps->server);
+            do_random(host,port,dps);
             break;
         case(HASH):
-            do_hash(host,port,dps->server);
+            do_hash(host,port,dps);
             break;
         default:
-            do_round_robin(host,port,dps->server);
+            do_round_robin(host,port,dps);
     }
 }
 
-static void do_round_robin(char *host, char *port, char **server){
+static void do_round_robin(char *host, char *port, DPS *dps){
+    dps->count += dps->count;
+    DPI *info = (dps->proxyInfos)[dps->count % dps->size];
+    strcpy(host,info->host);
+    strcpy(port,info->port);
+}
+
+static void do_weighted_round_robin(char *host, char *port, DPS *dps){
 
 }
 
-static void do_weighted_round_robin(char *host, char *port, char **server){
+static void do_random(char *host, char *port, DPS *dps){
 
 }
 
-static void do_random(char *host, char *port, char **server){
-
-}
-
-static void do_hash(char *host, char *port, char **server){
+static void do_hash(char *host, char *port, DPS *dps){
 
 }
 
