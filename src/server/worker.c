@@ -2,7 +2,7 @@
 
 TS thread_pool_instance;
 extern NADIA_CONFIG nadiaConfig;
-MAP_INSTANCE *lfdMap;
+MAP_INSTANCE *listenfd_map;
 
 void reload_handler(int sig);
 void stop_handler(int sig);
@@ -26,7 +26,7 @@ void do_work(){
     SS ** servers = nadiaConfig.pcs->servers;
     
     //key---value  ----> listenfd --- server
-    lfdMap = init_hashmap(0);
+    listenfd_map = init_hashmap(0);
 
     //记录当前所有的监听文件描述符
     int *lfd = (int*)calloc(serverSize,sizeof(int)); 
@@ -37,7 +37,7 @@ void do_work(){
         FD_SET(listenfd, &read_set);
         lfd[i] = listenfd;
         //维护listenfd 和 server的映射关系
-        lfdMap->put(lfdMap,listenfd,*servers);
+        listenfd_map->put(listenfd_map,listenfd,*servers);
     }
 
     //初始化工作线程池，工作线程处理每个客户端发来的请求
@@ -71,7 +71,7 @@ void *do_proxy(void *vargp){
         struct sockaddr_storage clientaddr;
 
         //根据listenfd获取代理信息
-        SS *server = (SS *)(lfdMap->get(lfdMap,*lfp));
+        SS *server = (SS *)(listenfd_map->get(listenfd_map,*lfp));
         clientlen = sizeof(struct sockaddr_storage); 
         connfd = Accept(*lfp, (SA *)&clientaddr, &clientlen);
         Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE,

@@ -16,16 +16,19 @@ void parser_request(int connfd,SS *server){
 
     //开始匹配代理信息
     SDI sdi;
+    sdi.method = method;
+    sdi.version = version;
+    sdi.connfd = connfd;
+    sdi.rio = rio;
     if(match_proxy(method,uri,server,&sdi)<1){
         clienterror(connfd, uri, "404", "Not found",
                     "Nadia couldn't find this page");
     }
 
     if(sdi.isStatic){
-        serve_static(connfd,&sdi);
+        serve_static(&sdi);
     } else {
-        serve_dynamic(connfd,&sdi);
-        read_requesthdrs(&rio); 
+        serve_dynamic(&sdi);
     }
 }
 
@@ -101,7 +104,7 @@ static int match_location(char *uri, LMS *lms, SDI *sdi, int (*routine)(char *,c
                     strcpy(path,(locations[i])->sps->root);
                     strcat(path,uri);
                 }
-                if((locations[i])->sps->index != NULL){
+                if((locations[i])->sps->index != NULL && has_filetype(uri)>0){
                     strcat(path,(locations[i])->sps->index);
                 }
                 sdi->path = path;
@@ -115,18 +118,4 @@ static int match_location(char *uri, LMS *lms, SDI *sdi, int (*routine)(char *,c
     return 0;
 }
 
-
-
-
-static void read_requesthdrs(rio_t *rp) {
-    char buf[MAXLINE];
-    //需要解析length等信息，并且需要缓存
-    Rio_readlineb(rp, buf, MAXLINE);
-    printf("%s", buf);
-    while (strcmp(buf, "\r\n")) {          //line:netp:readhdrs:checkterm
-        Rio_readlineb(rp, buf, MAXLINE);
-        printf("%s", buf);
-    }
-    return;
-}
 

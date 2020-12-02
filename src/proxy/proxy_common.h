@@ -8,4 +8,6 @@ void clienterror(int fd, char *cause, char *errnum,
 
 void get_filetype(char *filename, char *filetype);
 
+int has_filetype(char *filename);
+
 #endif

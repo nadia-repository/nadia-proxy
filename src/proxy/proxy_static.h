@@ -4,4 +4,4 @@
     fd 连接文件描述符
     sds 代理目标
 */
-void serve_static(int fd, SDI *sdi);
+void serve_static(SDI *sdi);

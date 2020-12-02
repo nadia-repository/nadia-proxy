@@ -4,10 +4,12 @@
 
 /*
 反向代理负载均衡策略
-    loop:轮训
-    random:随机
+    ROUND_ROBIN:轮训
+    WEIGHTED_ROUND_ROBIN:加权轮训
+    RANDOM 随机
+    HASH 哈希
 */
-enum strategy {LOOP,IP,RANDOM};
+enum strategy {ROUND_ROBIN,WEIGHTED_ROUND_ROBIN,RANDOM,HASH};
 
 /*
 location匹配规则
@@ -103,6 +105,10 @@ typedef struct proxy_config_struct{
 typedef struct static_dynamic_info{
     int isStatic;
     char *path;
+    char *method;
+    char *version;
+    int connfd;
+    rio_t rio;
     DPS *dps;
 } SDI;
 

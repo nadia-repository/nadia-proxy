@@ -38,3 +38,14 @@ void get_filetype(char *filename, char *filetype){
     else
         strcpy(filetype, "text/plain");
 }
+
+int has_filetype(char *filename){
+    if ((strstr(filename, ".html"))
+        || (strstr(filename, ".gif"))
+        || (strstr(filename, ".png"))
+        || (strstr(filename, ".jpg"))
+    ){
+        return 1;
+    }
+    return 0;
+}

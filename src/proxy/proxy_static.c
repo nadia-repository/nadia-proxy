@@ -3,15 +3,15 @@
 static void request_static(int fd, char *filename, int filesize);
 
 
-void serve_static(int fd ,SDI *sdi) {
+void serve_static(SDI *sdi) {
     struct stat sbuf;
 
     if (stat(sdi->path, &sbuf) < 0) {
-        clienterror(fd, sdi->path, "404", "Not found",
+        clienterror(sdi->connfd, sdi->path, "404", "Not found",
                     "Nadia couldn't find this file");
         return;
     }  
-    request_static(fd,sdi->path,(int)sbuf.st_size);
+    request_static(sdi->connfd,sdi->path,(int)sbuf.st_size);
 }
 
 static void request_static(int fd, char *filename, int filesize){
