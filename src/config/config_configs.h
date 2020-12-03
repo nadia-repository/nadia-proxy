@@ -2,6 +2,6 @@
 typedef struct base_configs_struct{
     char *nadiaDir;
     int staticCacheTimeout;
-} CS;
+} BASE_CONFIGS;
 
-int load_configs(char *path,CS *cs);
+int load_configs(char *path,BASE_CONFIGS *base_configs);

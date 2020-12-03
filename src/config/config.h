@@ -3,12 +3,12 @@
 
 /*
 配置信息
-    cs 基础配置信息
+    base_configs 基础配置信息
     pcs 代理配置信息
 */
 typedef struct nadia_config_struct{
-    CS *cs;
-    HTTP_CONFIG *pcs;
+    BASE_CONFIGS *base_configs;
+    NAIDA_PROXY_CONFIG *nadia_proxy_config;
 } NADIA_CONFIG;
 
 

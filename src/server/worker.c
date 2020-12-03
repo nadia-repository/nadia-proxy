@@ -22,16 +22,16 @@ void do_work(){
     fd_set read_set, ready_set;
     FD_ZERO(&read_set);
 
-    uint16_t serverSize = nadiaConfig.pcs->serverSize;
+    uint16_t server_size = nadiaConfig.pcs->server_size;
     SERVERS_CONFIG ** servers = nadiaConfig.pcs->servers;
     
     //key---value  ----> listenfd --- server
     listenfd_map = init_hashmap(0);
 
     //记录当前所有的监听文件描述符
-    int *lfd = (int*)calloc(serverSize,sizeof(int)); 
+    int *lfd = (int*)calloc(server_size,sizeof(int)); 
 
-    for(int i = 0;i<serverSize;i++,servers++){
+    for(int i = 0;i<server_size;i++,servers++){
         listenfd = Open_listenfd((*servers)->listen);
         fprintf(stderr, "start listen port<%s> \n", (*servers)->listen);
         FD_SET(listenfd, &read_set);
@@ -41,14 +41,14 @@ void do_work(){
     }
 
     //初始化工作线程池，工作线程处理每个客户端发来的请求
-    init_pthread_pool(&thread_pool_instance,10,serverSize,do_proxy);
+    init_pthread_pool(&thread_pool_instance,10,server_size,do_proxy);
 
     while (1){
         ready_set = read_set;
         Select(listenfd+1, &ready_set, NULL, NULL, NULL);
          
         //todo 判断listenfd
-        for(int i = 0;i<serverSize;i++){
+        for(int i = 0;i<server_size;i++){
             if (FD_ISSET(lfd[i] , &ready_set)){
                 int *item = (int *)malloc(sizeof(int)); //开辟单独内存空间，防止并发覆盖
                 *item = lfd[i];

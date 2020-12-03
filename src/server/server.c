@@ -94,7 +94,7 @@ static void shotdown(void){
 */
 void signal_handler(int sig) {
     fprintf(stdout, "\nStop nadia server\n");
-    // free_proxy(&cs);
+    // free_proxy(&base_configs);
     // destroy_pthoread_pool(&ts);
     shotdown();
 }

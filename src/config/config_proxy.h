@@ -9,7 +9,7 @@ char *state_tag[] = { "init", "http", "servers","listen","location","root","alia
 typedef struct finite_state_machine {
     enum state current_state;
     char *tag;
-    void (* parse)(char *,void *);
+    void (* parse)(char *line,void *fsm,void *config);
     void *config;
     int next_state_size;
     struct finite_state_machine **next_states;
@@ -98,7 +98,7 @@ typedef struct location_map_struct{
 /*
 服务信息
     listen 服务器监听端口
-    locMap 监听端口代理信息
+    location_map 监听端口代理信息
         EXACT  -|- locationSize
                 |- locations
         
@@ -113,7 +113,7 @@ typedef struct location_map_struct{
 */
 typedef struct servers_struct{
     char *listen;
-    MAP_INSTANCE *locMap;
+    MAP_INSTANCE *location_map;
 } SERVERS_CONFIG;
 
 /*
@@ -121,9 +121,13 @@ typedef struct servers_struct{
     servers 代理信息列表
 */
 typedef struct http_struct{
-    uint16_t serverSize;
+    uint16_t server_size;
     SERVERS_CONFIG **servers;
 } HTTP_CONFIG;
+
+typedef struct nadia_proxy_struct{
+    HTTP_CONFIG *http_config;
+} NAIDA_PROXY_CONFIG;
 
 /*
 静态代理&动态代理信息
@@ -146,6 +150,6 @@ retrun 1 或 0
 1: 读取配置成功
 0: 读取配置失败
 */
-int load_proxy(char *dir, HTTP_CONFIG *pcs);
+int load_proxy(char *dir, NAIDA_PROXY_CONFIG *nadia_proxy_config);
 
-void free_proxy(HTTP_CONFIG *pcs);
+void free_proxy(NAIDA_PROXY_CONFIG *nadia_proxy_config);

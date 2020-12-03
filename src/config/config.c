@@ -7,17 +7,17 @@ int load_nadia_config(char *dir,NADIA_CONFIG *config){
     init_file_path(dir);
 
     //加载基础配置
-    CS *cs = (CS *)malloc(sizeof(CS));
-    load_configs(dir,cs);
+    BASE_CONFIGS *base_configs = (BASE_CONFIGS *)malloc(sizeof(BASE_CONFIGS));
+    load_configs(dir,base_configs);
 
     //加载代理配置
-    HTTP_CONFIG *pcs = (HTTP_CONFIG *)malloc(sizeof(HTTP_CONFIG));
-    load_proxy(dir,pcs);
+    NAIDA_PROXY_CONFIG *nadia_proxy_config = malloc(sizeof(NAIDA_PROXY_CONFIG));
+    load_proxy(dir,nadia_proxy_config);
 
     //日志文件映射
 
-    config->cs = cs;
-    config->pcs = pcs;
+    config->base_configs = base_configs;
+    config->nadia_proxy_config = nadia_proxy_config;
     return 1;
 
 }
