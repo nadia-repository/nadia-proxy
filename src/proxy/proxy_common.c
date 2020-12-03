@@ -35,6 +35,12 @@ void get_filetype(char *filename, char *filetype){
         strcpy(filetype, "image/png");
     else if (strstr(filename, ".jpg"))
         strcpy(filetype, "image/jpeg");
+    else if (strstr(filename, ".js"))
+        strcpy(filetype, "text/javascript");
+    else if (strstr(filename, ".css"))
+        strcpy(filetype, "text/css; charset=utf-8");
+    else if (strstr(filename, ".svg"))
+        strcpy(filetype, "image/svg+xml");
     else
         strcpy(filetype, "text/plain");
 }
@@ -44,6 +50,9 @@ int has_filetype(char *filename){
         || (strstr(filename, ".gif"))
         || (strstr(filename, ".png"))
         || (strstr(filename, ".jpg"))
+        || (strstr(filename, ".js"))
+        || (strstr(filename, ".css"))
+        || (strstr(filename, ".svg"))
     ){
         return 1;
     }

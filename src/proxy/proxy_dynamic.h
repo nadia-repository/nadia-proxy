@@ -1,4 +1,5 @@
 #include "proxy_common.h"
+#include "lb.h"
 
 /*
 进行动态代理

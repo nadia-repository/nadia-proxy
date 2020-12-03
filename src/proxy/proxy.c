@@ -1,7 +1,6 @@
 #include "proxy.h"
 
 static int match_location(char *uri, LMS *lms, SDI *sdi, int (*routine)(char *,char *));
-static void read_requesthdrs(rio_t *rp);
 
 void parser_request(int connfd,SS *server){
     rio_t rio;
@@ -20,7 +19,7 @@ void parser_request(int connfd,SS *server){
     sdi.uri = uri;
     sdi.version = version;
     sdi.connfd = connfd;
-    sdi.rio = rio;
+    sdi.rio = &rio;
     if(match_proxy(method,uri,server,&sdi)<1){
         clienterror(connfd, uri, "404", "Not found",
                     "Nadia couldn't find this page");
@@ -35,7 +34,6 @@ void parser_request(int connfd,SS *server){
 
 
 int match_proxy(char *method,char *uri,SS *server,SDI *sdi){
-
     //1.精确匹配 =
     LMS *exactLocation = (LMS *)server->locMap->get(server->locMap,EXACT);
     if(exactLocation != NULL){
@@ -45,7 +43,6 @@ int match_proxy(char *method,char *uri,SS *server,SDI *sdi){
             return 1;
         }
     }
-
     //2.前缀匹配 前缀匹配 ^~
     LMS *prefixLocation = (LMS *)server->locMap->get(server->locMap,PREFIX);
     if(prefixLocation != NULL){
@@ -55,7 +52,6 @@ int match_proxy(char *method,char *uri,SS *server,SDI *sdi){
             return 1;
         }
     }
-
     //3.正则匹配 ~
     LMS *regexLocation = (LMS *)server->locMap->get(server->locMap,REGEX);
     if(regexLocation != NULL){
@@ -65,7 +61,6 @@ int match_proxy(char *method,char *uri,SS *server,SDI *sdi){
             return 1;
         }
     }
-
     //4.无修饰匹配 
     LMS *noneLocation = (LMS *)server->locMap->get(server->locMap,NONE);
     if(noneLocation != NULL){
@@ -105,7 +100,7 @@ static int match_location(char *uri, LMS *lms, SDI *sdi, int (*routine)(char *,c
                     strcpy(path,(locations[i])->sps->root);
                     strcat(path,uri);
                 }
-                if((locations[i])->sps->index != NULL && has_filetype(uri)>0){
+                if((locations[i])->sps->index != NULL && has_filetype(uri)==0){
                     strcat(path,(locations[i])->sps->index);
                 }
                 sdi->path = path;

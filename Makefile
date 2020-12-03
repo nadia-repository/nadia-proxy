@@ -7,7 +7,7 @@ LIB = -lpthread
 
 all: server
 
-server: src/server/server.c proxy.o proxy_common.o proxy_static.o proxy_dynamic.o  match.o hashmap.o csapp.o thread.o config.o config_configs.o config_proxy.o  worker.o
+server: src/server/server.c proxy.o proxy_common.o proxy_static.o proxy_dynamic.o lb.o match.o hashmap.o csapp.o thread.o config.o config_configs.o config_proxy.o  worker.o
 	$(CC) $(CFLAGS) -o nadia src/server/server.c \
 	match.o \
 	hashmap.o \
@@ -20,6 +20,7 @@ server: src/server/server.c proxy.o proxy_common.o proxy_static.o proxy_dynamic.
 	proxy_common.o \
 	proxy_static.o \
 	proxy_dynamic.o \
+	lb.o \
 	worker.o \
 	-I src/util \
 	-I src/config \
@@ -31,8 +32,8 @@ server: src/server/server.c proxy.o proxy_common.o proxy_static.o proxy_dynamic.
 worker.o: src/server/worker.c 
 	$(CC) $(CFLAGS) -c src/server/worker.c -I src/config -I src/core -I src/util -I src/proxy
 
-proxy.o: src/proxy/proxy.c src/proxy/proxy_common.c src/proxy/proxy_static.c src/proxy/proxy_dynamic.c
-	$(CC) $(CFLAGS) -c src/proxy/proxy.c src/proxy/proxy_common.c src/proxy/proxy_static.c src/proxy/proxy_dynamic.c -I src/config -I src/core -I src/util
+proxy.o: src/proxy/proxy.c src/proxy/proxy_common.c src/proxy/proxy_static.c src/proxy/proxy_dynamic.c src/proxy/lb.c
+	$(CC) $(CFLAGS) -c src/proxy/proxy.c src/proxy/proxy_common.c src/proxy/proxy_static.c src/proxy/proxy_dynamic.c src/proxy/lb.c -I src/config -I src/core -I src/util
 
 # proxy.o: src/proxy/proxy_common.c 
 # 	$(CC) $(CFLAGS) -c src/proxy/proxy_common.c  -I src/config -I src/core -I src/util

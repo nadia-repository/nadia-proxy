@@ -17,6 +17,7 @@ void serve_static(SDI *sdi) {
 static void request_static(int fd, char *filename, int filesize){
     int srcfd;
     char *srcp, filetype[MAXLINE], buf[MAXBUF];
+    fprintf(stdout, "request_static filename=%s\n",filename);
     //写入http头部信息
     get_filetype(filename, filetype);    
     sprintf(buf, "HTTP/1.0 200 OK\r\n"); 

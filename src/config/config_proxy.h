@@ -123,7 +123,7 @@ typedef struct static_dynamic_info{
     char *uri;
     char *version;
     int connfd;
-    rio_t rio;
+    rio_t *rio;
     DPS *dps;
 } SDI;
 
