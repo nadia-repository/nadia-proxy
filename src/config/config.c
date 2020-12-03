@@ -11,7 +11,7 @@ int load_nadia_config(char *dir,NADIA_CONFIG *config){
     load_configs(dir,cs);
 
     //加载代理配置
-    PCS *pcs = (PCS *)malloc(sizeof(PCS));
+    HTTP_CONFIG *pcs = (HTTP_CONFIG *)malloc(sizeof(HTTP_CONFIG));
     load_proxy(dir,pcs);
 
     //日志文件映射

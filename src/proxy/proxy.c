@@ -2,7 +2,7 @@
 
 static int match_location(char *uri, LMS *lms, SDI *sdi, int (*routine)(char *,char *));
 
-void parser_request(int connfd,SS *server){
+void parser_request(int connfd,SERVERS_CONFIG *server){
     rio_t rio;
     
     char buf[MAXLINE], method[MAXLINE], uri[MAXLINE], version[MAXLINE];
@@ -33,7 +33,7 @@ void parser_request(int connfd,SS *server){
 }
 
 
-int match_proxy(char *method,char *uri,SS *server,SDI *sdi){
+int match_proxy(char *method,char *uri,SERVERS_CONFIG *server,SDI *sdi){
     //1.精确匹配 =
     LMS *exactLocation = (LMS *)server->locMap->get(server->locMap,EXACT);
     if(exactLocation != NULL){

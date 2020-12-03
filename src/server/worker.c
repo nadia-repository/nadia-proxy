@@ -23,7 +23,7 @@ void do_work(){
     FD_ZERO(&read_set);
 
     uint16_t serverSize = nadiaConfig.pcs->serverSize;
-    SS ** servers = nadiaConfig.pcs->servers;
+    SERVERS_CONFIG ** servers = nadiaConfig.pcs->servers;
     
     //key---value  ----> listenfd --- server
     listenfd_map = init_hashmap(0);
@@ -71,7 +71,7 @@ void *do_proxy(void *vargp){
         struct sockaddr_storage clientaddr;
 
         //根据listenfd获取代理信息
-        SS *server = (SS *)(listenfd_map->get(listenfd_map,*lfp));
+        SERVERS_CONFIG *server = (SERVERS_CONFIG *)(listenfd_map->get(listenfd_map,*lfp));
         clientlen = sizeof(struct sockaddr_storage); 
         connfd = Accept(*lfp, (SA *)&clientaddr, &clientlen);
         Getnameinfo((SA *) &clientaddr, clientlen, hostname, MAXLINE,

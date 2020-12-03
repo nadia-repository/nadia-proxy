@@ -2,6 +2,19 @@
 #include "constant.h"
 #include "hashmap.h"
 
+enum state {INIT,HTTP,SERVERS,LISTEN,LOCATION,ROOT,ALIAS,STRATEGY,PROXY,SERVER};
+
+char *state_tag[] = { "init", "http", "servers","listen","location","root","alias","strategy","proxy","server"};
+
+typedef struct finite_state_machine {
+    enum state current_state;
+    char *tag;
+    void (* parse)(char *,void *);
+    void *config;
+    int next_state_size;
+    struct finite_state_machine **next_states;
+} FSM;
+
 /*
 反向代理负载均衡策略
     ROUND_ROBIN:轮训
@@ -98,19 +111,19 @@ typedef struct location_map_struct{
         NONE   -|- locationSize
                 |- locations
 */
-typedef struct server_struct{
+typedef struct servers_struct{
     char *listen;
     MAP_INSTANCE *locMap;
-} SS;
+} SERVERS_CONFIG;
 
 /*
 代理配置信息
     servers 代理信息列表
 */
-typedef struct proxy_config_struct{
+typedef struct http_struct{
     uint16_t serverSize;
-    SS **servers;
-} PCS;
+    SERVERS_CONFIG **servers;
+} HTTP_CONFIG;
 
 /*
 静态代理&动态代理信息
@@ -133,6 +146,6 @@ retrun 1 或 0
 1: 读取配置成功
 0: 读取配置失败
 */
-int load_proxy(char *path, PCS *pcs);
+int load_proxy(char *dir, HTTP_CONFIG *pcs);
 
-void free_proxy(PCS *pcs);
+void free_proxy(HTTP_CONFIG *pcs);

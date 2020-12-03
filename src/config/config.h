@@ -8,7 +8,7 @@
 */
 typedef struct nadia_config_struct{
     CS *cs;
-    PCS *pcs;
+    HTTP_CONFIG *pcs;
 } NADIA_CONFIG;
 
 
