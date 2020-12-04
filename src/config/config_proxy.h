@@ -1,6 +1,7 @@
 #include "csapp.h"
 #include "constant.h"
 #include "hashmap.h"
+#include "stack.h"
 
 enum state {INIT,HTTP,SERVERS,LISTEN,LOCATION,ROOT,ALIAS,STRATEGY,PROXY,SERVER};
 
@@ -39,23 +40,23 @@ enum match_type {EXACT,PREFIX,REGEX,NONE};
     port 主机端口
     weight 权重
 */
-typedef struct dynamic_proxy_info{
+typedef struct reverse_proxy_struct{
     char *host;
     char *port;
     int weight;
-} DPI;
+} REVERSE_PROXY;
 
 /*
 动态代理信息
     proxyStrategy 负责均衡策略
     server 代理服务列表
 */
-typedef struct dynamic_proxy_struct{
+typedef struct server_proxy_struct{
     enum strategy proxyStrategy;
     int size;
-    DPI **proxyInfos;
+    REVERSE_PROXY **reverse_proxys;
     int count;
-} DPS;
+} SERVER_PROXY;
 
 /*
 静态代理信息
@@ -66,7 +67,7 @@ typedef struct static_proxy_struct{
     char *alias;
     char *root;
     char *index;
-} SPS;
+} STATIC_PROXY;
 
 /*
 代理信息
@@ -79,8 +80,8 @@ typedef struct location_struct{
     char *pattern;
     enum match_type matchType;
     int isStatic;
-    SPS *sps;
-    DPS *dps;
+    STATIC_PROXY *static_proxy;
+    SERVER_PROXY *server_proxy;
 } LS;
 
 
@@ -141,7 +142,7 @@ typedef struct static_dynamic_info{
     char *version;
     int connfd;
     rio_t *rio;
-    DPS *dps;
+    SERVER_PROXY *server_proxy;
 } SDI;
 
 /*

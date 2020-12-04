@@ -1,51 +1,51 @@
 #include "proxy_dynamic.h"
 
 static void request_dynamic(char *host, char *port, SDI *sdi);
-static void select_server(char *host, char *port, DPS *dps);
+static void select_server(char *host, char *port, SERVER_PROXY *server_proxy);
 
-static void do_round_robin(char *host, char *port, DPS *dps);
-static void do_weighted_round_robin(char *host, char *port, DPS *dps);
-static void do_ip_hash(char *host, char *port, DPS *dps);
+static void do_round_robin(char *host, char *port, SERVER_PROXY *server_proxy);
+static void do_weighted_round_robin(char *host, char *port, SERVER_PROXY *server_proxy);
+static void do_ip_hash(char *host, char *port, SERVER_PROXY *server_proxy);
 
 void serve_dynamic(SDI *sdi){
     char host[MAXLINE], port[MAXLINE];
-    select_server(host,port,sdi->dps);
+    select_server(host,port,sdi->server_proxy);
     request_dynamic(host,port,sdi);
 }
 
-static void select_server(char *host, char *port, DPS *dps){
-    switch (dps->proxyStrategy){
+static void select_server(char *host, char *port, SERVER_PROXY *server_proxy){
+    switch (server_proxy->proxyStrategy){
         case(ROUND_ROBIN):
-            do_round_robin(host,port,dps);
+            do_round_robin(host,port,server_proxy);
             break;
         case(WEIGHTED_ROUND_ROBIN):
-            do_weighted_round_robin(host,port,dps);
+            do_weighted_round_robin(host,port,server_proxy);
             break;
         case(IP_HASH):
-            do_ip_hash(host,port,dps);
+            do_ip_hash(host,port,server_proxy);
             break;
         default:
-            do_round_robin(host,port,dps);
+            do_round_robin(host,port,server_proxy);
     }
 }
 
-static void do_round_robin(char *host, char *port, DPS *dps){
+static void do_round_robin(char *host, char *port, SERVER_PROXY *server_proxy){
     int index;
-    index = round_robin(&(dps->count),dps->size);
+    index = round_robin(&(server_proxy->count),server_proxy->size);
 
-    DPI *info = (dps->proxyInfos)[index];
+    REVERSE_PROXY *info = (server_proxy->reverse_proxys)[index];
     strcpy(host,info->host);
     strcpy(port,info->port);
 }
 
-static void do_weighted_round_robin(char *host, char *port, DPS *dps){
+static void do_weighted_round_robin(char *host, char *port, SERVER_PROXY *server_proxy){
     //todo
 }
 
-static void do_ip_hash(char *host, char *port, DPS *dps){
+static void do_ip_hash(char *host, char *port, SERVER_PROXY *server_proxy){
     int index;
-    index = ip_hash(host,dps->size);
-    DPI *info = (dps->proxyInfos)[index];
+    index = ip_hash(host,server_proxy->size);
+    REVERSE_PROXY *info = (server_proxy->reverse_proxys)[index];
     strcpy(host,info->host);
     strcpy(port,info->port);
 }

@@ -92,21 +92,21 @@ static int match_location(char *uri, LMS *lms, SDI *sdi, int (*routine)(char *,c
             if(sdi->isStatic){
                 //静态代理
                 char path[MAXBUF];
-                if((locations[i])->sps->alias != NULL){
+                if((locations[i])->static_proxy->alias != NULL){
                     //1.alias = alias + fileName
-                    strcpy(path,(locations[i])->sps->alias);
+                    strcpy(path,(locations[i])->static_proxy->alias);
                 }else {
                     //2.root = root + uri + fileName
-                    strcpy(path,(locations[i])->sps->root);
+                    strcpy(path,(locations[i])->static_proxy->root);
                     strcat(path,uri);
                 }
-                if((locations[i])->sps->index != NULL && has_filetype(uri)==0){
-                    strcat(path,(locations[i])->sps->index);
+                if((locations[i])->static_proxy->index != NULL && has_filetype(uri)==0){
+                    strcat(path,(locations[i])->static_proxy->index);
                 }
                 sdi->path = path;
             }else {
                 //动态代理
-                sdi->dps = (locations[i])->dps;
+                sdi->server_proxy = (locations[i])->server_proxy;
             }
             return 1;
         }
