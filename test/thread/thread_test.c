@@ -2,7 +2,7 @@
 
 void *do_proxy(void *vargp);
 
-TS ts;
+THREAD_POOL ts;
 int main(){
 
     init_pthread_pool(&ts,10,3,do_proxy);

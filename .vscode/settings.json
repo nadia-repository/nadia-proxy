@@ -18,6 +18,7 @@
         "algorithm": "c",
         "ctime": "c",
         "__locale": "c",
-        "cstring": "c"
+        "cstring": "c",
+        "type_traits": "cpp"
     }
 }

@@ -31,13 +31,13 @@ typedef struct hashmap_struct{
     unsigned int size;
     unsigned int elements;
     NODE **nodes;
-} MAP_INSTANCE;
+} HASHMAP;
 
 /*
 初始化hashmap
     size 为空时，默认大小为DEFAULT_INITIAL_CAPACITY
 */
-MAP_INSTANCE *init_hashmap(unsigned int size);
+HASHMAP *init_hashmap(unsigned int size);
 
 /*
 往hashmap中添加元素
@@ -45,33 +45,33 @@ MAP_INSTANCE *init_hashmap(unsigned int size);
     key
     value
 */
-void put_hashmap(MAP_INSTANCE *map ,int key,void *value);
+void put_hashmap(HASHMAP *map ,int key,void *value);
 
 /*
 根据key获取value
     map hashmap对象
     key
 */
-void *get_hashmap(MAP_INSTANCE *map ,int key);
+void *get_hashmap(HASHMAP *map ,int key);
 
 /*
 根据key删除hashcode
     map hashmap对象
     key
 */
-void delete_hashmap(MAP_INSTANCE *map, int key);
+void delete_hashmap(HASHMAP *map, int key);
 
 /*
 根据key计算hashcode
     map hashmap对象
     key
 */
-int hash(MAP_INSTANCE *map, int key);
+int hash(HASHMAP *map, int key);
 
 /*
 超过当前容量时扩容
     map hashmap对象
 */
-void resize(MAP_INSTANCE *map);
+void resize(HASHMAP *map);
 
 #endif 

@@ -1,11 +1,11 @@
 #include "hashmap.h"
 
-MAP_INSTANCE *init_hashmap(unsigned int size){
+HASHMAP *init_hashmap(unsigned int size){
     if(size <=0){
         size = DEFAULT_INITIAL_CAPACITY;
     }
     NODE **nodes = calloc(size,sizeof(NODE*));
-    MAP_INSTANCE *map = malloc(sizeof(MAP_INSTANCE));
+    HASHMAP *map = malloc(sizeof(HASHMAP));
     map->size = size;
     map->elements = 0;
     map->nodes = nodes;
@@ -16,7 +16,7 @@ MAP_INSTANCE *init_hashmap(unsigned int size){
 }
 
 //todo 需要考虑并发安全
-void put_hashmap(MAP_INSTANCE *map ,int key,void *value){
+void put_hashmap(HASHMAP *map ,int key,void *value){
     if(DEBUG_INFO)
         fprintf(stdout, "into put_hashmap key=%d \n", key);
     int hashcode = hash(map,key);
@@ -49,7 +49,7 @@ void put_hashmap(MAP_INSTANCE *map ,int key,void *value){
 }
 
 //todo 需要考虑并发安全
-void *get_hashmap(MAP_INSTANCE *map ,int key){
+void *get_hashmap(HASHMAP *map ,int key){
     if(DEBUG_INFO)
         fprintf(stdout, "into get_hashmap key=%d \n", key);
     int hashcode = hash(map,key);
@@ -66,7 +66,7 @@ void *get_hashmap(MAP_INSTANCE *map ,int key){
     }
 }
 
-void delete_hashmap(MAP_INSTANCE *map, int key){
+void delete_hashmap(HASHMAP *map, int key){
     if(DEBUG_INFO)
         fprintf(stdout, "into delete_hashmap key=%d \n", key);
     int hashcode = hash(map,key);
@@ -87,11 +87,11 @@ void delete_hashmap(MAP_INSTANCE *map, int key){
     }
 }
 
-int hash(MAP_INSTANCE *map ,int key){
+int hash(HASHMAP *map ,int key){
     unsigned int size = map->size;
     return key % size;
 }
 
-void resize(MAP_INSTANCE *map){
+void resize(HASHMAP *map){
     
 }

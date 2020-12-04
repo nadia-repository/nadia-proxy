@@ -68,7 +68,7 @@ static void mock_config(NAIDA_PROXY_CONFIG *nadia_proxy_config){
     server = malloc(sizeof(SERVERS_CONFIG));
     server->listen = "80";
 
-    MAP_INSTANCE * map = init_hashmap(0);
+    HASHMAP * map = init_hashmap(0);
     LMS *lms = malloc(sizeof(LMS));
     lms->locationSize = 1;
     LS **lss = calloc(1,sizeof(LS *));
@@ -258,7 +258,7 @@ static void parse_servers(char *line, void *fsm, void *config){
     HTTP_CONFIG *http_config = (HTTP_CONFIG *)config;
 
     SERVERS_CONFIG *servers_config = malloc(sizeof(SERVERS_CONFIG));
-    MAP_INSTANCE *location_map = init_hashmap(0);
+    HASHMAP *location_map = init_hashmap(0);
     servers_config->location_map = location_map;
 
     uint16_t server_size = http_config->server_size;
@@ -314,7 +314,7 @@ typedef struct config_node_struct{
 } CONFIG_NODE;
 
 
-void create_tree(STACK_INSTANCE *stack){
+void create_tree(STACK *stack){
     CONFIG_NODE  *node = (CONFIG_NODE *)stack->pop(stack);
     if(node == NULL){
         return;
@@ -345,7 +345,7 @@ void parse_file_to_tree(){
     FILE * fp = NULL;
     char buf[MAXLINE];
     
-    STACK_INSTANCE *stack = init_stack(0);
+    STACK *stack = init_stack(0);
 
     fp = fopen("/Users/xiangshi/Documents/workspace_c/testregx/proxy.conf" ,  "r" );
     while (fgets(buf, MAXLINE, fp) != NULL) {

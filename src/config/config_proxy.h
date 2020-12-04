@@ -114,7 +114,7 @@ typedef struct location_map_struct{
 */
 typedef struct servers_struct{
     char *listen;
-    MAP_INSTANCE *location_map;
+    HASHMAP *location_map;
 } SERVERS_CONFIG;
 
 /*

@@ -17,7 +17,7 @@ typedef struct stack_struct{
     int size;
     int sp;
     void **nodes;
-} STACK_INSTANCE;
+} STACK;
 
 /*
 初始化stack实例
@@ -26,14 +26,14 @@ typedef struct stack_struct{
     返回 
         stack实例
 */
-STACK_INSTANCE *init_stack(unsigned int size);
+STACK *init_stack(unsigned int size);
 
 /*
 入栈
     stack stack实例
     node 节点
 */
-void push_stack(STACK_INSTANCE *stack, void *node);
+void push_stack(STACK *stack, void *node);
 
 /*
 出栈
@@ -42,4 +42,4 @@ void push_stack(STACK_INSTANCE *stack, void *node);
     返回
         节点
 */
-void *pop_stack(STACK_INSTANCE *stack);
+void *pop_stack(STACK *stack);

@@ -1,8 +1,8 @@
 #include "worker.h"
 
-TS thread_pool_instance;
+THREAD_POOL thread_pool_instance;
 extern NADIA_CONFIG nadiaConfig;
-MAP_INSTANCE *listenfd_map;
+HASHMAP *listenfd_map;
 
 void reload_handler(int sig);
 void stop_handler(int sig);

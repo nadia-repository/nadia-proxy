@@ -1,12 +1,12 @@
 #include "stack.h"
 
-static void resize(STACK_INSTANCE *stack);
+static void resize(STACK *stack);
 
-STACK_INSTANCE *init_stack(unsigned int size){
+STACK *init_stack(unsigned int size){
     if(size==0){
         size = DEFAULT_INITIAL_CAPACITY;
     }
-    STACK_INSTANCE *stack_instance = malloc(sizeof(STACK_INSTANCE));
+    STACK *stack_instance = malloc(sizeof(STACK));
     stack_instance->pop = &pop_stack;
     stack_instance->push = &push_stack;
     stack_instance->size = size;
@@ -18,7 +18,7 @@ STACK_INSTANCE *init_stack(unsigned int size){
 }
 
 
-void push_stack(STACK_INSTANCE *stack, void *node){
+void push_stack(STACK *stack, void *node){
     if(stack->sp == stack->size){
         resize(stack);
     }
@@ -26,7 +26,7 @@ void push_stack(STACK_INSTANCE *stack, void *node){
     stack->nodes[stack->sp] = node;
 }
 
-void *pop_stack(STACK_INSTANCE *stack){
+void *pop_stack(STACK *stack){
     if(stack->sp == 0){
         return NULL;
     }
@@ -35,7 +35,7 @@ void *pop_stack(STACK_INSTANCE *stack){
     return node;
 }
 
-static void resize(STACK_INSTANCE *stack){
+static void resize(STACK *stack){
     unsigned int new_size = stack->size + (stack->size * DEFAULT_LOAD_FACTOR);
 
     void **new_nodes = calloc(new_size,sizeof(void *));

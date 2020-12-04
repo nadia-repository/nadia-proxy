@@ -2,7 +2,7 @@
 
 int main(){
 
-    MAP_INSTANCE *map = init_hashmap(0);
+    HASHMAP *map = init_hashmap(0);
     printf("map size =%d \n",map->size);
 
     int key = 1;

@@ -1,6 +1,6 @@
 #include "thread.h"
 
-void init_pthread_pool(TS *ts,unsigned int workers,unsigned int maxTaskNum, void *handler){
+void init_pthread_pool(THREAD_POOL *ts,unsigned int workers,unsigned int maxTaskNum, void *handler){
     ts->compartments = Calloc(maxTaskNum,sizeof(void *));
     ts->maxTaskNum = maxTaskNum;
     ts->front = ts->rear = 0;
@@ -26,7 +26,7 @@ void init_pthread_pool(TS *ts,unsigned int workers,unsigned int maxTaskNum, void
     }
 }
 
-void put_pthread_item(TS *ts,void *task){
+void put_pthread_item(THREAD_POOL *ts,void *task){
     P(ts->slots);
     P(ts->mutex);
     int index = (++ts->rear)%(ts->maxTaskNum);
@@ -35,7 +35,7 @@ void put_pthread_item(TS *ts,void *task){
     V(ts->tasks);
 }
 
-void *get_pthread_item(TS *ts){
+void *get_pthread_item(THREAD_POOL *ts){
     void *item;
     P(ts->tasks);
     P(ts->mutex);
@@ -46,7 +46,7 @@ void *get_pthread_item(TS *ts){
     return item;
 }
 
-void destroy_pthoread_pool(TS *ts){
+void destroy_pthoread_pool(THREAD_POOL *ts){
     Free(ts->compartments);
     Free(ts);
 }

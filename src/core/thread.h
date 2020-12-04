@@ -20,7 +20,7 @@ typedef struct thread_struct{
     sem_t *mutex;
     sem_t *slots;
     sem_t *tasks;
-} TS;
+} THREAD_POOL;
 
 /*
 基于生产者消费者模型初始化线程池，初始化workers数量的线程。
@@ -31,7 +31,7 @@ tasks为空置时，线程阻塞在tasks消费队列。
     maxTaskNum 最大任务数
     handler 线程执行方法
 */
-void init_pthread_pool(TS *ts,unsigned int workers,unsigned int maxTaskNum, void *handler);
+void init_pthread_pool(THREAD_POOL *ts,unsigned int workers,unsigned int maxTaskNum, void *handler);
 
 /*
 为线程池中线程生产工作
@@ -39,18 +39,18 @@ void init_pthread_pool(TS *ts,unsigned int workers,unsigned int maxTaskNum, void
     ts 线程池对象
     task 工作
 */
-void put_pthread_item(TS *ts,void *task);
+void put_pthread_item(THREAD_POOL *ts,void *task);
 
 /*
 线程池中线程消费工作
 线程执行方法中需要调用该方法获取task，没有task时挂起线程
     ts 线程池对象
 */
-void *get_pthread_item(TS *ts);
+void *get_pthread_item(THREAD_POOL *ts);
 
 /*
 销毁线程池
     ts 线程池对象
 */
-void destroy_pthoread_pool(TS *ts);
+void destroy_pthoread_pool(THREAD_POOL *ts);
 
