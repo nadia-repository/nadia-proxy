@@ -4,6 +4,10 @@
 #define DEFAULT_INITIAL_CAPACITY 16
 #define DEFAULT_LOAD_FACTOR 0.75
 
+#define INIT_STACK init_stack(0)
+#define PUSH_STACK(stack,node) stack->push(stack,node)
+#define POP_STACK(stack) stack->pop(stack)
+
 /*
 stack对象结构
     push 绑定push_stack方法

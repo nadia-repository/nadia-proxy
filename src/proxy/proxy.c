@@ -35,7 +35,7 @@ void parser_request(int connfd,SERVERS_CONFIG *server){
 
 int match_proxy(char *method,char *uri,SERVERS_CONFIG *server,SDI *sdi){
     //1.精确匹配 =
-    LMS *exactLocation = (LMS *)server->location_map->get(server->location_map,EXACT);
+    LMS *exactLocation = (LMS *)GET_HASHMAP(server->location_map,EXACT);
     if(exactLocation != NULL){
         //do精确匹配
         if(match_location(uri,exactLocation,sdi,&exact_match) > 0){
@@ -44,7 +44,7 @@ int match_proxy(char *method,char *uri,SERVERS_CONFIG *server,SDI *sdi){
         }
     }
     //2.前缀匹配 前缀匹配 ^~
-    LMS *prefixLocation = (LMS *)server->location_map->get(server->location_map,PREFIX);
+    LMS *prefixLocation = (LMS *)GET_HASHMAP(server->location_map,PREFIX);
     if(prefixLocation != NULL){
         //do前缀匹配
         if(match_location(uri,prefixLocation,sdi,&prefix_match)){
@@ -53,7 +53,7 @@ int match_proxy(char *method,char *uri,SERVERS_CONFIG *server,SDI *sdi){
         }
     }
     //3.正则匹配 ~
-    LMS *regexLocation = (LMS *)server->location_map->get(server->location_map,REGEX);
+    LMS *regexLocation = (LMS *)GET_HASHMAP(server->location_map,REGEX);
     if(regexLocation != NULL){
         //do正则匹配
         if(match_location(uri,regexLocation,sdi,&regex_match)){
@@ -62,7 +62,7 @@ int match_proxy(char *method,char *uri,SERVERS_CONFIG *server,SDI *sdi){
         }
     }
     //4.无修饰匹配 
-    LMS *noneLocation = (LMS *)server->location_map->get(server->location_map,NONE);
+    LMS *noneLocation = (LMS *)GET_HASHMAP(server->location_map,NONE);
     if(noneLocation != NULL){
         //do无修饰匹配 
         if(match_location(uri,noneLocation,sdi,&none_match)){

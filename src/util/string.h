@@ -5,6 +5,14 @@
 #define DEFAULT_INITIAL_CAPACITY 20
 #define DEFAULT_LOAD_FACTOR 0.75
 
+#define INIT_STRING init_string(0)
+#define GET_STRING(dest) dest->get_string(dest)
+#define VALUE_CHAR(dest,src) dest->value_char(dest,src)
+#define VALUE_CHARS(dest,src) dest->value_chars(dest,src)
+#define JOIN_CHAR(dest,src) dest->join_char(dest,src)
+#define JOIN_CHARS(dest,src) dest->join_chars(dest,src)
+#define JOIN_STRING(dest,src) dest->join_string(dest,src)
+
 typedef struct string_struct{
     char *string;
     int size;

@@ -3,9 +3,10 @@
 static void mock_config(NAIDA_PROXY_CONFIG *nadia_proxy_config);
 static void load_proxy_conf(char *path, NAIDA_PROXY_CONFIG *nadia_proxy_config);
 
-
+static void pares_proxy_file(char *filename);
 static void generate_state_chain(FSM **fsm);
-static void pares_file(FILE * fp, char *line, FSM *fsm, void *config);
+static void generate_config_tree(STACK *stack);
+static void generate_proxy_config(CONFIG_NODE  *node);
 
 static void parse_http(char *line,void *fsm,void *);
 static void parse_servers(char *,void *,void *);
@@ -68,7 +69,7 @@ static void mock_config(NAIDA_PROXY_CONFIG *nadia_proxy_config){
     server = malloc(sizeof(SERVERS_CONFIG));
     server->listen = "80";
 
-    HASHMAP * map = init_hashmap(0);
+    HASHMAP * map = INIT_HASHMAP;
     LMS *lms = malloc(sizeof(LMS));
     lms->locationSize = 1;
     LS **lss = calloc(1,sizeof(LS *));
@@ -86,7 +87,7 @@ static void mock_config(NAIDA_PROXY_CONFIG *nadia_proxy_config){
     ls->static_proxy = static_proxy;
     lss[0] = ls;
     lms->locations = lss;
-    map->put(map,NONE,lms);
+    PUT_HASHMAP(map,NONE,lms);
 
     server->location_map = map;
     servers[0] = server;
@@ -107,32 +108,7 @@ static void load_proxy_conf(char *path, NAIDA_PROXY_CONFIG *nadia_proxy_config){
     FSM **status_machine_arrary = calloc(sizeof(state_tag)/sizeof(char *),sizeof(FSM *));
     generate_state_chain(status_machine_arrary);
 
-    FILE * fp = NULL;
-    char buf[2014];
-    char *p;
-    fp = fopen("/Users/xiangshi/Documents/workspace_c/testregx/proxy.conf" ,  "r" );
-    while (fgets(buf, MAXLINE, fp) != NULL) {
-        pares_file(fp,buf,status_machine_arrary[HTTP],nadia_proxy_config);
-        printf("%s",buf);
-    }
-}
-
-static void pares_file(FILE * fp, char *line, FSM *fsm, void *config){
-    void *temp_config = config;
-    if(*line != '\0' && *line != '#' && *line != '\n'){
-        if(strcmp(line,fsm->tag)){
-            //do 自己的parse
-            (fsm->parse)(line,fsm,temp_config);
-            //解析下一行
-            char buf[MAXLINE];
-            if(fgets(buf, MAXLINE, fp) != NULL){
-                for(int i =0;i<fsm->next_state_size;i++){
-                    pares_file(fp,buf,fsm->next_states[i],temp_config);
-                }
-            }
-
-        }
-    }
+    pares_proxy_file(path);
 }
 
 /*
@@ -258,7 +234,7 @@ static void parse_servers(char *line, void *fsm, void *config){
     HTTP_CONFIG *http_config = (HTTP_CONFIG *)config;
 
     SERVERS_CONFIG *servers_config = malloc(sizeof(SERVERS_CONFIG));
-    HASHMAP *location_map = init_hashmap(0);
+    HASHMAP *location_map = INIT_HASHMAP;
     servers_config->location_map = location_map;
 
     uint16_t server_size = http_config->server_size;
@@ -303,19 +279,50 @@ static void parse_server(char *line,void *fsm){
 
 }
 
-enum config_node_type {PARENT,CHILD};
+static void pares_proxy_file(char *filename){
+    FILE * fp = NULL;
+    char buf[MAXLINE];
+    
+    STACK *stack = INIT_STACK;
 
-typedef struct config_node_struct{
-    enum config_node_type node_type;
-    char *content;
+    fp = fopen(filename ,  "r" );
+    while (fgets(buf, MAXLINE, fp) != NULL) {
+        char *c;
+        char *line = calloc(MAXLINE,sizeof(char));
+        for(c = buf;*c != '\0' && *c != '#' && *c != '\n';c++){
+            if(*c == '{'){
+                CONFIG_NODE *parent_node = malloc(sizeof(CONFIG_NODE));
+                parent_node->node_type = PARENT;
+                parent_node->content = line;
+                parent_node->child = NULL;
+                parent_node->friend = NULL;
+                PUSH_STACK(stack,parent_node);
+            } else if(*c == '}'){
+                generate_config_tree(stack);
+            } else if(*c == ';'){
+                CONFIG_NODE *child_node = malloc(sizeof(CONFIG_NODE));
+                child_node->node_type = CHILD;
+                child_node->content = line;
+                child_node->child = NULL;
+                child_node->friend = NULL;
+                PUSH_STACK(stack,child_node);
+            } else {
+                char nadia = *c;
+                strcat(line,&nadia);
+            }
+        }
+    }
 
-    struct config_node_struct *friend;
-    struct config_node_struct *child;
-} CONFIG_NODE;
-
-
-void create_tree(STACK *stack){
     CONFIG_NODE  *node = (CONFIG_NODE *)stack->pop(stack);
+    while(node != NULL){
+        generate_proxy_config(node);
+        node = (CONFIG_NODE *)stack->pop(stack);
+    }
+}
+
+static void generate_config_tree(STACK *stack){
+    CONFIG_NODE  *node = (CONFIG_NODE *)POP_STACK(stack);
+    
     if(node == NULL){
         return;
     }
@@ -329,51 +336,17 @@ void create_tree(STACK *stack){
             if(pre_node->node_type == PARENT){
                 pre_node->child = node;
                 pre_node->node_type = CHILD;
-                stack->push(stack,pre_node);
+                PUSH_STACK(stack,pre_node);
                 return;
             }else if(pre_node->node_type == CHILD){
                 pre_node->friend = node;
-                stack->push(stack,pre_node);
+                PUSH_STACK(stack,pre_node);
             }
-            node = (CONFIG_NODE *)stack->pop(stack);
+            node = (CONFIG_NODE *)POP_STACK(stack);
         }
     }
 }
 
+static void generate_proxy_config(CONFIG_NODE  *node){
 
-void parse_file_to_tree(){
-    FILE * fp = NULL;
-    char buf[MAXLINE];
-    
-    STACK *stack = init_stack(0);
-
-    fp = fopen("/Users/xiangshi/Documents/workspace_c/testregx/proxy.conf" ,  "r" );
-    while (fgets(buf, MAXLINE, fp) != NULL) {
-        char *c;
-        char *line = calloc(MAXLINE,sizeof(char));
-        for(c = buf;*c != '\0' && *c != '#' && *c != '\n';c++){
-            if(*c == '{'){
-                CONFIG_NODE *parent_node = malloc(sizeof(CONFIG_NODE));
-                parent_node->node_type = PARENT;
-                parent_node->content = line;
-                parent_node->child = NULL;
-                parent_node->friend = NULL;
-                stack->push(stack,parent_node);
-            } else if(*c == '}'){
-                create_tree(stack);
-            } else if(*c == ';'){
-                CONFIG_NODE *child_node = malloc(sizeof(CONFIG_NODE));
-                child_node->node_type = CHILD;
-                child_node->content = line;
-                child_node->child = NULL;
-                child_node->friend = NULL;
-                stack->push(stack,child_node);
-            } else {
-                char nadia = *c;
-                strcat(line,&nadia);
-            }
-        }
-    }
-
-    CONFIG_NODE  *node = (CONFIG_NODE *)stack->pop(stack);
 }

@@ -8,6 +8,12 @@
 #define DEFAULT_INITIAL_CAPACITY 16
 #define DEFAULT_LOAD_FACTOR 0.75
 
+#define INIT_HASHMAP init_hashmap(0)
+#define PUT_HASHMAP(map,key,value)  map->put(map,key,value)
+#define GET_HASHMAP(map,key) map->get(map,key)
+#define DELETE_HASHMAP(map,key) map->delete(map,key)
+
+
 /*
 hashmap中node对象
     hash

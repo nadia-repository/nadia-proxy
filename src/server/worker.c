@@ -26,7 +26,7 @@ void do_work(){
     SERVERS_CONFIG ** servers = nadiaConfig.pcs->servers;
     
     //key---value  ----> listenfd --- server
-    listenfd_map = init_hashmap(0);
+    listenfd_map = INIT_HASHMAP;
 
     //记录当前所有的监听文件描述符
     int *lfd = (int*)calloc(server_size,sizeof(int)); 
@@ -37,7 +37,7 @@ void do_work(){
         FD_SET(listenfd, &read_set);
         lfd[i] = listenfd;
         //维护listenfd 和 server的映射关系
-        listenfd_map->put(listenfd_map,listenfd,*servers);
+        PUT_HASHMAP(listenfd_map,listenfd,*servers);
     }
 
     //初始化工作线程池，工作线程处理每个客户端发来的请求

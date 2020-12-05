@@ -16,6 +16,16 @@ typedef struct finite_state_machine {
     struct finite_state_machine **next_states;
 } FSM;
 
+enum config_node_type {PARENT,CHILD};
+
+typedef struct config_node_struct{
+    enum config_node_type node_type;
+    char *content;
+
+    struct config_node_struct *friend;
+    struct config_node_struct *child;
+} CONFIG_NODE;
+
 /*
 反向代理负载均衡策略
     ROUND_ROBIN:轮训
