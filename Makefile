@@ -7,10 +7,12 @@ LIB = -lpthread
 
 all: server
 
-server: src/server/server.c proxy.o proxy_common.o proxy_static.o proxy_dynamic.o lb.o match.o hashmap.o csapp.o thread.o config.o config_configs.o config_proxy.o  worker.o
+server: src/server/server.c proxy.o proxy_common.o proxy_static.o proxy_dynamic.o lb.o match.o hashmap.o stack.o dynamic_string.o csapp.o thread.o config.o config_configs.o config_proxy.o  worker.o
 	$(CC) $(CFLAGS) -o nadia src/server/server.c \
 	match.o \
 	hashmap.o \
+	stack.o \
+	dynamic_string.o \
 	csapp.o \
 	thread.o \
 	config.o \
@@ -35,9 +37,6 @@ worker.o: src/server/worker.c
 proxy.o: src/proxy/proxy.c src/proxy/proxy_common.c src/proxy/proxy_static.c src/proxy/proxy_dynamic.c src/proxy/lb.c
 	$(CC) $(CFLAGS) -c src/proxy/proxy.c src/proxy/proxy_common.c src/proxy/proxy_static.c src/proxy/proxy_dynamic.c src/proxy/lb.c -I src/config -I src/core -I src/util
 
-# proxy.o: src/proxy/proxy_common.c 
-# 	$(CC) $(CFLAGS) -c src/proxy/proxy_common.c  -I src/config -I src/core -I src/util
-
 config.o: src/config/config.c src/config/config_configs.c src/config/config_proxy.c 
 	$(CC) $(CFLAGS) -c src/config/config.c src/config/config_configs.c src/config/config_proxy.c  -I src/core -I src/util
 
@@ -52,6 +51,12 @@ csapp.o: src/core/csapp.c
 	
 hashmap.o: src/util/hashmap.c
 	$(CC) $(CFLAGS) -c src/util/hashmap.c -I src/core
+
+stack.o: src/util/stack.c
+	$(CC) $(CFLAGS) -c src/util/stack.c -I src/core
+
+dynamic_string.o: src/util/dynamic_string.c
+	$(CC) $(CFLAGS) -c src/util/dynamic_string.c -I src/core
 
 clean:
 	rm -f *.o nadia *~

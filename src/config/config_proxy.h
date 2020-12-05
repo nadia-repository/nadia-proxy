@@ -5,8 +5,6 @@
 
 enum state {INIT,HTTP,SERVERS,LISTEN,LOCATION,ROOT,ALIAS,STRATEGY,PROXY,SERVER};
 
-char *state_tag[] = { "init", "http", "servers","listen","location","root","alias","strategy","proxy","server"};
-
 typedef struct finite_state_machine {
     enum state current_state;
     char *tag;
@@ -132,7 +130,7 @@ typedef struct servers_struct{
     servers 代理信息列表
 */
 typedef struct http_struct{
-    uint16_t server_size;
+    int server_size;
     SERVERS_CONFIG **servers;
 } HTTP_CONFIG;
 

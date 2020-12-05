@@ -2,6 +2,7 @@
 #define PROXY_COMMON_H 
 
 #include "config.h"
+#include <stdlib.h>
 
 void clienterror(int fd, char *cause, char *errnum,
                  char *shortmsg, char *longmsg);

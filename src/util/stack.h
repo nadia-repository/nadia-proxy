@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "csapp.h"
 
-#define DEFAULT_INITIAL_CAPACITY 16
-#define DEFAULT_LOAD_FACTOR 0.75
+#define STACK_DEFAULT_INITIAL_CAPACITY 16
+#define STACK_DEFAULT_LOAD_FACTOR 0.75
 
 #define INIT_STACK init_stack(0)
 #define PUSH_STACK(stack,node) stack->push(stack,node)

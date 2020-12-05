@@ -10,13 +10,15 @@ static void generate_proxy_config(CONFIG_NODE  *node);
 
 static void parse_http(char *line,void *fsm,void *);
 static void parse_servers(char *,void *,void *);
-static void parse_listen(char *,void *);
-static void parse_location(char *,void *);
-static void parse_strategy(char *,void *);
-static void parse_proxy(char *,void *);
-static void parse_root(char *,void *);
-static void parse_alias(char *,void *);
-static void parse_server(char *,void *);
+static void parse_listen(char *,void *,void *);
+static void parse_location(char *,void *,void *);
+static void parse_strategy(char *,void *,void *);
+static void parse_proxy(char *,void *,void *);
+static void parse_root(char *,void *,void *);
+static void parse_alias(char *,void *,void *);
+static void parse_server(char *,void *,void *);
+
+static char *state_tag[] = { "init", "http", "servers","listen","location","root","alias","strategy","proxy","server"};
 
 int load_proxy(char *dir, NAIDA_PROXY_CONFIG *nadia_proxy_config){
     char path[MAXLINE];
@@ -28,6 +30,7 @@ int load_proxy(char *dir, NAIDA_PROXY_CONFIG *nadia_proxy_config){
         mock_config(nadia_proxy_config);
         return 1;
     }else{
+        load_proxy_conf(dir,nadia_proxy_config);
         return 0;
     }
 }
@@ -148,7 +151,7 @@ void generate_state_chain(FSM **fsm){
     root->current_state = ROOT;
     root->tag = state_tag[root->current_state];
     root->next_state_size = 0;
-    root->next_state_size = NULL;
+    root->next_states = NULL;
     root->parse = &parse_root;
     fsm[root->current_state] = root;
 
@@ -157,7 +160,7 @@ void generate_state_chain(FSM **fsm){
     alias->current_state = ALIAS;
     alias->tag = state_tag[alias->current_state];
     alias->next_state_size = 0;
-    alias->next_state_size = NULL;
+    alias->next_states = NULL;
     alias->parse = &parse_alias;
     fsm[alias->current_state] = alias;
 
@@ -251,31 +254,31 @@ static void parse_servers(char *line, void *fsm, void *config){
     config = servers_config;
 }
 
-static void parse_listen(char *line,void *fsm){
+static void parse_listen(char *line,void *fsm, void *config){
 
 }
 
-static void parse_location(char *line,void *fsm){
+static void parse_location(char *line,void *fsm, void *config){
 
 }
 
-static void parse_strategy(char *line,void *fsm){
+static void parse_strategy(char *line,void *fsm, void *config){
 
 }
 
-static void parse_proxy(char *line,void *fsm){
+static void parse_proxy(char *line,void *fsm, void *config){
 
 }
 
-static void parse_root(char *line,void *fsm){
+static void parse_root(char *line,void *fsm, void *config){
 
 }
 
-static void parse_alias(char *line,void *fsm){
+static void parse_alias(char *line,void *fsm, void *config){
 
 }
 
-static void parse_server(char *line,void *fsm){
+static void parse_server(char *line,void *fsm, void *config){
 
 }
 

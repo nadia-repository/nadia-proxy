@@ -22,8 +22,8 @@ void do_work(){
     fd_set read_set, ready_set;
     FD_ZERO(&read_set);
 
-    uint16_t server_size = nadiaConfig.pcs->server_size;
-    SERVERS_CONFIG ** servers = nadiaConfig.pcs->servers;
+    uint16_t server_size = nadiaConfig.nadia_proxy_config->http_config->server_size;
+    SERVERS_CONFIG ** servers = nadiaConfig.nadia_proxy_config->http_config->servers;
     
     //key---value  ----> listenfd --- server
     listenfd_map = INIT_HASHMAP;

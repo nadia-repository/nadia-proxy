@@ -2,7 +2,7 @@
 
 HASHMAP *init_hashmap(unsigned int size){
     if(size <=0){
-        size = DEFAULT_INITIAL_CAPACITY;
+        size = HASHMAP_DEFAULT_INITIAL_CAPACITY;
     }
     NODE **nodes = calloc(size,sizeof(NODE*));
     HASHMAP *map = malloc(sizeof(HASHMAP));

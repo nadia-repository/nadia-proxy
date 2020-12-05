@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include "constant.h"
 
-#define DEFAULT_INITIAL_CAPACITY 16
-#define DEFAULT_LOAD_FACTOR 0.75
+#define HASHMAP_DEFAULT_INITIAL_CAPACITY 16
+#define HASHMAP_DEFAULT_LOAD_FACTOR 0.75
 
 #define INIT_HASHMAP init_hashmap(0)
 #define PUT_HASHMAP(map,key,value)  map->put(map,key,value)

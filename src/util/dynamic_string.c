@@ -1,11 +1,11 @@
-#include "string.h"
+#include "dynamic_string.h"
 
 static void resize(STRING *dest);
 static int chars_size(char *cs);
 
 STRING *init_string(int size){
     if(size==0){
-        size = DEFAULT_INITIAL_CAPACITY;
+        size = STRING_DEFAULT_INITIAL_CAPACITY;
     }
     STRING *string = malloc(sizeof(STRING));
     string->size = size;
@@ -17,6 +17,8 @@ STRING *init_string(int size){
     string->join_char = &join_char;
     string->join_chars = &join_chars;
     string->join_string = &join_string;
+
+    return string;
 }
 
 char *get_string(STRING *dest){
@@ -55,7 +57,7 @@ void join_chars(STRING *dest, char *src){
         join_chars(dest,src);
         return;
     }
-    strcat(dest,src);
+    strcat(dest->string,src);
     dest->length +=size;
 }
 
@@ -65,14 +67,14 @@ void join_string(STRING *dest, STRING *src){
         join_string(dest,src);
         return;
     }
-    strcat(dest,src);
+    strcat(dest->string,src->string);
     dest->length +=(src->length);
 }
 
 static void resize(STRING *dest){
-    dest->size = dest->size + dest->size * DEFAULT_LOAD_FACTOR;
+    dest->size = dest->size + dest->size * STRING_DEFAULT_LOAD_FACTOR;
     char *string = calloc(dest->size,sizeof(char));
-    strcyp(string,dest->string);
+    strcpy(string,dest->string);
     Free(dest->string);
     dest->string = string;
 }

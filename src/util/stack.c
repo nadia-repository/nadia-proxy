@@ -4,7 +4,7 @@ static void resize(STACK *stack);
 
 STACK *init_stack(unsigned int size){
     if(size==0){
-        size = DEFAULT_INITIAL_CAPACITY;
+        size = STACK_DEFAULT_INITIAL_CAPACITY;
     }
     STACK *stack_instance = malloc(sizeof(STACK));
     stack_instance->pop = &pop_stack;
@@ -36,7 +36,7 @@ void *pop_stack(STACK *stack){
 }
 
 static void resize(STACK *stack){
-    unsigned int new_size = stack->size + (stack->size * DEFAULT_LOAD_FACTOR);
+    unsigned int new_size = stack->size + (stack->size * STACK_DEFAULT_LOAD_FACTOR);
 
     void **new_nodes = calloc(new_size,sizeof(void *));
 
