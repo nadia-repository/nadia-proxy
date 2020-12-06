@@ -63,6 +63,14 @@ void free_proxy(NAIDA_PROXY_CONFIG *nadia_proxy_config){
     // Free(servers);
 }
 
+CONFIG_NODE *init_config_node(enum config_node_type node_type, void *content, CONFIG_NODE *friend, CONFIG_NODE *child){
+    CONFIG_NODE *node = malloc(sizeof(CONFIG_NODE));
+    parent_node->node_type = node_type;
+    parent_node->content = content;
+    parent_node->child = child;
+    parent_node->friend = friend;
+    return node;
+}
 
 static void mock_config(NAIDA_PROXY_CONFIG *nadia_proxy_config){
     HTTP_CONFIG *http_config = malloc(sizeof(HTTP_CONFIG));
@@ -291,35 +299,28 @@ static void pares_proxy_file(char *filename){
     fp = fopen(filename ,  "r" );
     while (fgets(buf, MAXLINE, fp) != NULL) {
         char *c;
-        char *line = calloc(MAXLINE,sizeof(char));
-        for(c = buf;*c != '\0' && *c != '#' && *c != '\n';c++){
+        STRING *string = INIT_STRING;
+        int pre_blank = 0;
+        for(c = buf;*c != '\0' && *c != '#' && *c != '\n' && (pre_blank | isblank(*c) == 0) ;c++){
+            pre_blank = isblank(*c) > 0 ? : 1 : 0;
             if(*c == '{'){
-                CONFIG_NODE *parent_node = malloc(sizeof(CONFIG_NODE));
-                parent_node->node_type = PARENT;
-                parent_node->content = line;
-                parent_node->child = NULL;
-                parent_node->friend = NULL;
+                CONFIG_NODE *parent_node = init_config_node(PARENT,string,NULL,NULL);
                 PUSH_STACK(stack,parent_node);
             } else if(*c == '}'){
                 generate_config_tree(stack);
             } else if(*c == ';'){
-                CONFIG_NODE *child_node = malloc(sizeof(CONFIG_NODE));
-                child_node->node_type = CHILD;
-                child_node->content = line;
-                child_node->child = NULL;
-                child_node->friend = NULL;
+                CONFIG_NODE *child_node = init_config_node(CHILD,string,NULL,NULL);
                 PUSH_STACK(stack,child_node);
             } else {
-                char nadia = *c;
-                strcat(line,&nadia);
+                JOIN_CHAR(string,c);
             }
         }
     }
 
-    CONFIG_NODE  *node = (CONFIG_NODE *)stack->pop(stack);
+    CONFIG_NODE  *node = (CONFIG_NODE *)POP_STACK(stack);
     while(node != NULL){
         generate_proxy_config(node);
-        node = (CONFIG_NODE *)stack->pop(stack);
+        node = (CONFIG_NODE *)POP_STACK(stack);
     }
 }
 
@@ -335,7 +336,7 @@ static void generate_config_tree(STACK *stack){
         stack->push(stack,node);
     }else {
         while(node->node_type != PARENT){
-            CONFIG_NODE  *pre_node = (CONFIG_NODE *)stack->pop(stack);
+            CONFIG_NODE  *pre_node = (CONFIG_NODE *)POP_STACK(stack);
             if(pre_node->node_type == PARENT){
                 pre_node->child = node;
                 pre_node->node_type = CHILD;

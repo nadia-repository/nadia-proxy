@@ -2,6 +2,8 @@
 #include "constant.h"
 #include "hashmap.h"
 #include "stack.h"
+#include "dynamic_string.h"
+#include <ctype.h>
 
 enum state {INIT,HTTP,SERVERS,LISTEN,LOCATION,ROOT,ALIAS,STRATEGY,PROXY,SERVER};
 
@@ -18,7 +20,7 @@ enum config_node_type {PARENT,CHILD};
 
 typedef struct config_node_struct{
     enum config_node_type node_type;
-    char *content;
+    void *content;
 
     struct config_node_struct *friend;
     struct config_node_struct *child;
@@ -162,3 +164,5 @@ retrun 1 或 0
 int load_proxy(char *dir, NAIDA_PROXY_CONFIG *nadia_proxy_config);
 
 void free_proxy(NAIDA_PROXY_CONFIG *nadia_proxy_config);
+
+CONFIG_NODE *init_config_node(enum config_node_type node_type, void *content, CONFIG_NODE *friend, CONFIG_NODE *child);
