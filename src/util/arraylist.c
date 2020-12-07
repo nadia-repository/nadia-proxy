@@ -11,8 +11,10 @@ ARRAYLIST *init_arraylist(int size){
     list->elementData = calloc(list->size,sizeof(void *));
     list->length = 0;
     list->add = &add_arraylist;
+    list->add_with_index = &add_index_arraylist;
     list->get = &get_arraylist;
-    list->length = &arraylist_length;
+    list->arraylist_length = &arraylist_length;
+    list->arraylist_size = &arraylist_size;
     return list;
 }
 
@@ -23,18 +25,35 @@ void add_arraylist(ARRAYLIST *list, void *data){
     list->elementData[list->length++] = data;
 }
 
+void add_index_arraylist(ARRAYLIST *list, int index, void *data){
+    if(index > list->size || index < 0){
+        return;
+    }
+    list->elementData[index] = data;
+}
 
-void *get_arraylist(ARRAYLIST *list){
+
+void *get_arraylist(ARRAYLIST *list, int index){
     if(list->length <= 0){
         return NULL;
     }
-    return list->elementData[list->length--];
+    return list->elementData[index];
 }
 
 int arraylist_length(ARRAYLIST *list){
     return list->length;
 }
 
-static void resize(ARRAYLIST *list){
+int arraylist_size(ARRAYLIST *list){
+    return list->size;
+}
 
+static void resize(ARRAYLIST *list){
+    int size = list->size + list->size * ARRAYLIST_DEFAULT_LOAD_FACTOR;
+    void **elementData = calloc(size,sizeof(void *));
+    for(int i = 0;i<list->size;i++){
+        elementData[i] = list->elementData[i];
+    }
+    Free(list->elementData);
+    list->size = size;
 }

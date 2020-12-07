@@ -25,6 +25,8 @@
         "istream": "cpp",
         "memory": "cpp",
         "tuple": "cpp",
-        "utility": "cpp"
+        "utility": "cpp",
+        "limits": "cpp",
+        "*.tcc": "cpp"
     }
 }
