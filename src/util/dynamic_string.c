@@ -10,7 +10,7 @@ STRING *init_string(int size){
     STRING *string = malloc(sizeof(STRING));
     string->size = size;
     string->length = 0;
-
+    string->string = calloc(string->size,sizeof(char));
     string->get_string = &get_string;
     string->value_char = &value_char;
     string->value_chars = &value_chars;

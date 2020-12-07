@@ -10,8 +10,7 @@ enum state {INIT,HTTP,SERVERS,LISTEN,LOCATION,ROOT,ALIAS,STRATEGY,PROXY,SERVER};
 typedef struct finite_state_machine {
     enum state current_state;
     char *tag;
-    void (* parse)(char *line,void *fsm,void *config);
-    void *config;
+    void *(* parse)(char *line,void *config);
     int next_state_size;
     struct finite_state_machine **next_states;
 } FSM;

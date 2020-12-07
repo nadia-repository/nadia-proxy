@@ -53,3 +53,7 @@ int load_log(char *path){
 
     return 1;
 }
+
+void free_nadia_config(NADIA_CONFIG *config){
+    
+}

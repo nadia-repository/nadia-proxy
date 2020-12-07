@@ -13,3 +13,5 @@ typedef struct nadia_config_struct{
 
 
 int load_nadia_config(char *dir,NADIA_CONFIG *config);
+
+void free_nadia_config(NADIA_CONFIG *config);

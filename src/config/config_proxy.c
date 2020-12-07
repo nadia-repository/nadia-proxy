@@ -3,20 +3,20 @@
 static void mock_config(NAIDA_PROXY_CONFIG *nadia_proxy_config);
 static void load_proxy_conf(char *path, NAIDA_PROXY_CONFIG *nadia_proxy_config);
 
-static void pares_proxy_file(char *filename);
+static void pares_proxy_file(char *filename, NAIDA_PROXY_CONFIG *nadia_proxy_config);
 static void generate_state_chain(FSM **fsm);
 static void generate_config_tree(STACK *stack);
-static void generate_proxy_config(CONFIG_NODE  *node);
+static void generate_proxy_config(CONFIG_NODE  *node, void *config, FSM *fsm);
 
-static void parse_http(char *line,void *fsm,void *);
-static void parse_servers(char *,void *,void *);
-static void parse_listen(char *,void *,void *);
-static void parse_location(char *,void *,void *);
-static void parse_strategy(char *,void *,void *);
-static void parse_proxy(char *,void *,void *);
-static void parse_root(char *,void *,void *);
-static void parse_alias(char *,void *,void *);
-static void parse_server(char *,void *,void *);
+static void *parse_http(char *line,void *);
+static void *parse_servers(char *,void *);
+static void *parse_listen(char *,void *);
+static void *parse_location(char *,void *);
+static void *parse_strategy(char *,void *);
+static void *parse_proxy(char *,void *);
+static void *parse_root(char *,void *);
+static void *parse_alias(char *,void *);
+static void *parse_server(char *,void *);
 
 static char *state_tag[] = { "init", "http", "servers","listen","location","root","alias","strategy","proxy","server"};
 
@@ -36,39 +36,16 @@ int load_proxy(char *dir, NAIDA_PROXY_CONFIG *nadia_proxy_config){
 }
 
 void free_proxy(NAIDA_PROXY_CONFIG *nadia_proxy_config){
-    // SERVERS_CONFIG **servers = pcs->servers;
-    // uint16_t serversSize = pcs->server_size;
-    // fprintf(stderr, "free servers size =%d \n",serversSize);
-    // for(int i = 0;i < serversSize;i++){
-    //     SERVERS_CONFIG *server = servers[i];
-    //     LS **locations = server->locations;
-    //     uint16_t locationSize = server->locationSize;
-    //     fprintf(stderr, "free location size =%d \n",locationSize);
-    //     for(int j = 0;j < locationSize;j++){
-    //        LS *location = locations[j];
-    //        if(location->server_proxy != NULL){
-    //            Free(location->server_proxy->server);
-    //            Free(location->server_proxy);
-    //        }
-    //        if(location->static_proxy != NULL){
-    //            Free(location->static_proxy->alias);
-    //            Free(location->static_proxy->root); 
-    //            Free(location->static_proxy); 
-    //        }
-    //        Free(location);
-    //     }
-    //     Free(locations);
-    //     Free(server);
-    // }
-    // Free(servers);
+    HTTP_CONFIG *http_config = nadia_proxy_config->http_config;
+    
 }
 
 CONFIG_NODE *init_config_node(enum config_node_type node_type, void *content, CONFIG_NODE *friend, CONFIG_NODE *child){
     CONFIG_NODE *node = malloc(sizeof(CONFIG_NODE));
-    parent_node->node_type = node_type;
-    parent_node->content = content;
-    parent_node->child = child;
-    parent_node->friend = friend;
+    node->node_type = node_type;
+    node->content = content;
+    node->child = child;
+    node->friend = friend;
     return node;
 }
 
@@ -109,17 +86,19 @@ static void mock_config(NAIDA_PROXY_CONFIG *nadia_proxy_config){
     nadia_proxy_config->http_config = http_config;
 }
 
+/*
+加载代理配置文件
+    path 配置文件路径
+    nadia_proxy_config 代理配置文件
+*/
 static void load_proxy_conf(char *path, NAIDA_PROXY_CONFIG *nadia_proxy_config){
     struct stat sbuf;
     if (stat(path, &sbuf) < 0) {
         fprintf(stderr, "Load proxy.conf is not exist. path=%s \n",path);
         return;
-    }  
-    
-    FSM **status_machine_arrary = calloc(sizeof(state_tag)/sizeof(char *),sizeof(FSM *));
-    generate_state_chain(status_machine_arrary);
-
-    pares_proxy_file(path);
+    } 
+    nadia_proxy_config->http_config = NULL;
+    pares_proxy_file(path,nadia_proxy_config);
 }
 
 /*
@@ -230,9 +209,11 @@ void generate_state_chain(FSM **fsm){
 
 }
 
-static void parse_http(char *line, void *fsm, void *config){
+static void *parse_http(char *line, void *config){
     NAIDA_PROXY_CONFIG *nadia_proxy_config = (NAIDA_PROXY_CONFIG *)config;
-
+    if(nadia_proxy_config->http_config != NULL){
+        return;
+    }
     HTTP_CONFIG *http_config = malloc(sizeof(HTTP_CONFIG));
     http_config->server_size = 0;
 
@@ -241,7 +222,7 @@ static void parse_http(char *line, void *fsm, void *config){
     config = http_config;
 }
 
-static void parse_servers(char *line, void *fsm, void *config){
+static void *parse_servers(char *line, void *config){
     HTTP_CONFIG *http_config = (HTTP_CONFIG *)config;
 
     SERVERS_CONFIG *servers_config = malloc(sizeof(SERVERS_CONFIG));
@@ -262,38 +243,38 @@ static void parse_servers(char *line, void *fsm, void *config){
     config = servers_config;
 }
 
-static void parse_listen(char *line,void *fsm, void *config){
+static void *parse_listen(char *line, void *config){
 
 }
 
-static void parse_location(char *line,void *fsm, void *config){
+static void *parse_location(char *line, void *config){
 
 }
 
-static void parse_strategy(char *line,void *fsm, void *config){
+static void *parse_strategy(char *line, void *config){
 
 }
 
-static void parse_proxy(char *line,void *fsm, void *config){
+static void *parse_proxy(char *line,void *config){
 
 }
 
-static void parse_root(char *line,void *fsm, void *config){
+static void *parse_root(char *line, void *config){
 
 }
 
-static void parse_alias(char *line,void *fsm, void *config){
+static void *parse_alias(char *line, void *config){
 
 }
 
-static void parse_server(char *line,void *fsm, void *config){
+static void *parse_server(char *line, void *config){
 
 }
 
-static void pares_proxy_file(char *filename){
+static void pares_proxy_file(char *filename, NAIDA_PROXY_CONFIG *nadia_proxy_config){
     FILE * fp = NULL;
     char buf[MAXLINE];
-    
+
     STACK *stack = INIT_STACK;
 
     fp = fopen(filename ,  "r" );
@@ -301,8 +282,14 @@ static void pares_proxy_file(char *filename){
         char *c;
         STRING *string = INIT_STRING;
         int pre_blank = 0;
-        for(c = buf;*c != '\0' && *c != '#' && *c != '\n' && (pre_blank | isblank(*c) == 0) ;c++){
-            pre_blank = isblank(*c) > 0 ? : 1 : 0;
+        c = buf;
+        while(*c != '\0' && *c != '#' && *c != '\n'){
+            if(pre_blank > 0 && isblank(*c) > 0){
+                c++;
+                continue;
+            }
+            pre_blank = isblank(*c) > 0 ? 1 : 0;
+
             if(*c == '{'){
                 CONFIG_NODE *parent_node = init_config_node(PARENT,string,NULL,NULL);
                 PUSH_STACK(stack,parent_node);
@@ -312,15 +299,19 @@ static void pares_proxy_file(char *filename){
                 CONFIG_NODE *child_node = init_config_node(CHILD,string,NULL,NULL);
                 PUSH_STACK(stack,child_node);
             } else {
-                JOIN_CHAR(string,c);
+                JOIN_CHAR(string,*c);
             }
+            c++;
         }
     }
+    //初始化配置生产状态机
+    FSM **status_machine_arrary = calloc(sizeof(state_tag)/sizeof(char *),sizeof(FSM *));
+    generate_state_chain(status_machine_arrary);
 
     CONFIG_NODE  *node = (CONFIG_NODE *)POP_STACK(stack);
-    while(node != NULL){
-        generate_proxy_config(node);
-        node = (CONFIG_NODE *)POP_STACK(stack);
+    FSM *init = status_machine_arrary[INIT];
+    for(int i = 0;i< init->next_state_size; i++){
+        generate_proxy_config(node,nadia_proxy_config,init->next_states[i]);
     }
 }
 
@@ -337,7 +328,10 @@ static void generate_config_tree(STACK *stack){
     }else {
         while(node->node_type != PARENT){
             CONFIG_NODE  *pre_node = (CONFIG_NODE *)POP_STACK(stack);
-            if(pre_node->node_type == PARENT){
+            if(pre_node == NULL){
+                PUSH_STACK(stack,node);
+                return;
+            }else if(pre_node->node_type == PARENT){
                 pre_node->child = node;
                 pre_node->node_type = CHILD;
                 PUSH_STACK(stack,pre_node);
@@ -351,6 +345,19 @@ static void generate_config_tree(STACK *stack){
     }
 }
 
-static void generate_proxy_config(CONFIG_NODE  *node){
-
+static void generate_proxy_config(CONFIG_NODE  *node, void *config, FSM *fsm){
+    if(node == NULL){
+        return;
+    }
+    STRING *string = (STRING *)node->content;
+    void *node_config = NULL;
+    if(strcmp(string->string,fsm->tag) > 0){
+        node_config = fsm->parse(string->string,config);
+    }
+    //parse child
+    for(int i = 0 ;fsm->next_state_size ; i++){
+        generate_proxy_config(node->child,node_config,fsm->next_states[i]);
+    }
+    //parse friend
+    generate_proxy_config(node->friend,config,fsm);
 }
