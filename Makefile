@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -O2 -Wall -I .
+CFLAGS = -O2 -Wall -I . -g
 
 # This flag includes the Pthreads library on a Linux box.
 # Others systems will probably require something different.
@@ -63,5 +63,6 @@ arraylist.o: src/util/arraylist.c
 	$(CC) $(CFLAGS) -c src/util/arraylist.c -I src/core
 
 clean:
+	rm -rf *.dSYM
 	rm -f *.o nadia *~
 	
