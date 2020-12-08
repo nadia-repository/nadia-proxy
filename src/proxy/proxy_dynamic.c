@@ -31,9 +31,8 @@ static void select_server(char *host, char *port, SERVER_PROXY *server_proxy){
 
 static void do_round_robin(char *host, char *port, SERVER_PROXY *server_proxy){
     int index;
-    index = round_robin(&(server_proxy->count),server_proxy->size);
-
-    REVERSE_PROXY *info = (server_proxy->reverse_proxys)[index];
+    index = round_robin(&(server_proxy->request_count),ARRAYLIST_LENGTH(server_proxy->reverse_proxys_list));
+    REVERSE_PROXY *info = ARRAYLIST_CAST(REVERSE_PROXY *,server_proxy->reverse_proxys_list,index);
     strcpy(host,info->host);
     strcpy(port,info->port);
 }
@@ -44,8 +43,8 @@ static void do_weighted_round_robin(char *host, char *port, SERVER_PROXY *server
 
 static void do_ip_hash(char *host, char *port, SERVER_PROXY *server_proxy){
     int index;
-    index = ip_hash(host,server_proxy->size);
-    REVERSE_PROXY *info = (server_proxy->reverse_proxys)[index];
+    index = ip_hash(host,ARRAYLIST_LENGTH(server_proxy->reverse_proxys_list));
+    REVERSE_PROXY *info = ARRAYLIST_CAST(REVERSE_PROXY *,server_proxy->reverse_proxys_list,index);
     strcpy(host,info->host);
     strcpy(port,info->port);
 }

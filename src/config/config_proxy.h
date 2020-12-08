@@ -3,16 +3,19 @@
 #include "hashmap.h"
 #include "stack.h"
 #include "dynamic_string.h"
+#include "arraylist.h"
 #include <ctype.h>
 
-enum state {INIT,HTTP,SERVERS,LISTEN,LOCATION,ROOT,ALIAS,STRATEGY,PROXY,SERVER};
+enum state {INIT,HTTP,SERVERS,LISTEN,LOCATION,ROOT,ALIAS,INDEX,STRATEGY,PROXY,SERVER};
 
 typedef struct finite_state_machine {
     enum state current_state;
     char *tag;
     void *(* parse)(char *line,void *config);
-    int next_state_size;
-    struct finite_state_machine **next_states;
+    // int next_state_size;
+    // struct finite_state_machine **next_states;
+    ARRAYLIST *child_state_list;
+    ARRAYLIST *frient_state_list;
 } FSM;
 
 enum config_node_type {PARENT,CHILD};
@@ -58,19 +61,19 @@ typedef struct reverse_proxy_struct{
 /*
 动态代理信息
     proxyStrategy 负责均衡策略
-    server 代理服务列表
+    reverse_proxys_list 负载均衡地址(REVERSE_PROXY **reverse_proxys)
 */
 typedef struct server_proxy_struct{
     enum strategy proxyStrategy;
-    int size;
-    REVERSE_PROXY **reverse_proxys;
-    int count;
+    ARRAYLIST *reverse_proxys_list;
+    int request_count;
 } SERVER_PROXY;
 
 /*
 静态代理信息
     alias 重命名目录
     root 文件目录
+    index 默认页面
 */
 typedef struct static_proxy_struct{
     char *alias;
@@ -91,7 +94,7 @@ typedef struct location_struct{
     int isStatic;
     STATIC_PROXY *static_proxy;
     SERVER_PROXY *server_proxy;
-} LS;
+} LOCATION_CONFIG;
 
 
 /*
@@ -101,14 +104,15 @@ typedef struct location_struct{
 */
 typedef struct location_map_struct{
     uint16_t locationSize;
-    LS **locations;
+    LOCATION_CONFIG **locations;
 } LMS;
 
 
 /*
 服务信息
     listen 服务器监听端口
-    location_map 监听端口代理信息
+    location_list location列表
+    location_map 监听端口代理信息 
         EXACT  -|- locationSize
                 |- locations
         
@@ -123,16 +127,16 @@ typedef struct location_map_struct{
 */
 typedef struct servers_struct{
     char *listen;
+    ARRAYLIST *location_list;
     HASHMAP *location_map;
 } SERVERS_CONFIG;
 
 /*
 代理配置信息
-    servers 代理信息列表
+    servers_list 代理信息列表(SERVERS_CONFIG **servers)
 */
 typedef struct http_struct{
-    int server_size;
-    SERVERS_CONFIG **servers;
+    ARRAYLIST *servers_list;
 } HTTP_CONFIG;
 
 typedef struct nadia_proxy_struct{

@@ -82,7 +82,7 @@ int match_proxy(char *method,char *uri,SERVERS_CONFIG *server,SDI *sdi){
 */
 static int match_location(char *uri, LMS *lms, SDI *sdi, int (*routine)(char *,char *)){
     uint16_t locationSize = lms->locationSize;
-    LS **locations = lms->locations;
+    LOCATION_CONFIG **locations = lms->locations;
 
     int i;
     for(i = 0 ; i < locationSize ; i++){

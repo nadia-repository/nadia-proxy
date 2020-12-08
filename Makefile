@@ -7,12 +7,13 @@ LIB = -lpthread
 
 all: server
 
-server: src/server/server.c proxy.o proxy_common.o proxy_static.o proxy_dynamic.o lb.o match.o hashmap.o stack.o dynamic_string.o csapp.o thread.o config.o config_configs.o config_proxy.o  worker.o
+server: src/server/server.c proxy.o proxy_common.o proxy_static.o proxy_dynamic.o lb.o match.o hashmap.o stack.o dynamic_string.o arraylist.o csapp.o thread.o config.o config_configs.o config_proxy.o  worker.o
 	$(CC) $(CFLAGS) -o nadia src/server/server.c \
 	match.o \
 	hashmap.o \
 	stack.o \
 	dynamic_string.o \
+	arraylist.o \
 	csapp.o \
 	thread.o \
 	config.o \
@@ -57,6 +58,9 @@ stack.o: src/util/stack.c
 
 dynamic_string.o: src/util/dynamic_string.c
 	$(CC) $(CFLAGS) -c src/util/dynamic_string.c -I src/core
+
+arraylist.o: src/util/arraylist.c
+	$(CC) $(CFLAGS) -c src/util/arraylist.c -I src/core
 
 clean:
 	rm -f *.o nadia *~

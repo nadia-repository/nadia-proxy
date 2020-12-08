@@ -19,25 +19,29 @@ void do_work(){
     Signal(SIGINT, SIG_IGN);
 
     int listenfd=0;
+    int *lfd = NULL;
     fd_set read_set, ready_set;
     FD_ZERO(&read_set);
-
-    uint16_t server_size = nadiaConfig.nadia_proxy_config->http_config->server_size;
-    SERVERS_CONFIG ** servers = nadiaConfig.nadia_proxy_config->http_config->servers;
+    
+    ARRAYLIST *servers_list = nadiaConfig.nadia_proxy_config->http_config->servers_list;
+    int server_size = ARRAYLIST_LENGTH(servers_list);
     
     //key---value  ----> listenfd --- server
     listenfd_map = INIT_HASHMAP;
 
     //记录当前所有的监听文件描述符
-    int *lfd = (int*)calloc(server_size,sizeof(int)); 
+    ARRAYLIST * listenfd_list = ARRAYLIST_INIT_SIZE(server_size);
 
-    for(int i = 0;i<server_size;i++,servers++){
-        listenfd = Open_listenfd((*servers)->listen);
-        fprintf(stderr, "start listen port<%s> \n", (*servers)->listen);
+    for(int i = 0;i<server_size;i++){
+        SERVERS_CONFIG *servers = ARRAYLIST_CAST(SERVERS_CONFIG *,servers_list,i);
+        listenfd = Open_listenfd(servers->listen);
+        fprintf(stderr, "start listen port<%s> \n", (ARRAYLIST_CAST(SERVERS_CONFIG *,servers_list,i))->listen);
         FD_SET(listenfd, &read_set);
-        lfd[i] = listenfd;
+        lfd = malloc(sizeof(int));
+        *lfd = listenfd;
+        ARRAYLIST_ADD(listenfd_list,lfd);
         //维护listenfd 和 server的映射关系
-        PUT_HASHMAP(listenfd_map,listenfd,*servers);
+        PUT_HASHMAP(listenfd_map,listenfd,servers);
     }
 
     //初始化工作线程池，工作线程处理每个客户端发来的请求
@@ -46,17 +50,17 @@ void do_work(){
     while (1){
         ready_set = read_set;
         Select(listenfd+1, &ready_set, NULL, NULL, NULL);
-         
-        //todo 判断listenfd
+        int select_lfd;
+        //判断listenfd
         for(int i = 0;i<server_size;i++){
-            if (FD_ISSET(lfd[i] , &ready_set)){
+            select_lfd = *ARRAYLIST_CAST(int *,listenfd_list,i);
+            if (FD_ISSET(select_lfd , &ready_set)){
                 int *item = (int *)malloc(sizeof(int)); //开辟单独内存空间，防止并发覆盖
-                *item = lfd[i];
+                *item = select_lfd;
                 put_pthread_item(&thread_pool_instance,item);
             }
         }
     }
-
 }
 
 void *do_proxy(void *vargp){

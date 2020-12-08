@@ -55,6 +55,6 @@ static void resize(ARRAYLIST *list){
         elementData[i] = list->elementData[i];
     }
     Free(list->elementData);
-    list-elementData = elementData;
+    list->elementData = elementData;
     list->size = size;
 }

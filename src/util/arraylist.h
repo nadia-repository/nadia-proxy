@@ -9,11 +9,13 @@
 #define ARRAYLIST_DEFAULT_LOAD_FACTOR 0.75
 
 #define ARRAYLIST_INIT init_arraylist(0)
+#define ARRAYLIST_INIT_SIZE(size) init_arraylist(size)
 #define ARRAYLIST_ADD(list,data) list->add(list,data)
 #define ARRAYLIST_ADD_INDEX(list,index,data) list->add_with_index(list,index,data)
 #define ARRAYLIST_GET(list,index) list->get(list,index)
 #define ARRAYLIST_LENGTH(list) list->arraylist_length(list)
 #define ARRAYLIST_SIZE(list) list->arraylist_size(list)
+#define ARRAYLIST_CAST(type,list,index) (type)(ARRAYLIST_GET(list,index))
 
 typedef struct arraylist_struct{
     void **elementData;
