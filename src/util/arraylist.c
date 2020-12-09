@@ -13,8 +13,8 @@ ARRAYLIST *init_arraylist(int size){
     list->add = &add_arraylist;
     list->add_with_index = &add_index_arraylist;
     list->get = &get_arraylist;
-    list->arraylist_length = &arraylist_length;
-    list->arraylist_size = &arraylist_size;
+    // list->arraylist_length = &arraylist_length;
+    // list->arraylist_size = &arraylist_size;
     return list;
 }
 
@@ -41,6 +41,9 @@ void *get_arraylist(ARRAYLIST *list, int index){
 }
 
 int arraylist_length(ARRAYLIST *list){
+    if(list == NULL){
+        return 0;
+    }
     return list->length;
 }
 

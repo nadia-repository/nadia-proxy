@@ -384,7 +384,7 @@ int Dup2(int fd1, int fd2)
 void Stat(const char *filename, struct stat *buf) 
 {
     if (stat(filename, buf) < 0)
-	unix_error("Stat error");
+	    unix_error("Stat error");
 }
 
 void Fstat(int fd, struct stat *buf) 

@@ -11,7 +11,7 @@ static void shotdown(void);
 static void launch(void);
 static void reload(void);
 
-static void load(void);
+static int load(void);
 static void fire(void);
 static void reap_worker(void);
 
@@ -52,7 +52,9 @@ static void usage(void){
 static void launch(void){
     fprintf(stderr, "Wellcome Naida Proxy \n");
     //加载配置
-    load();
+    if(load() == 0){
+        return;
+    }
     //启动工作进程
     fire();
     //处理信号
@@ -142,12 +144,12 @@ static void reap_worker(void){
 /*
 配置文件等加载流程
 */
-static void load(void){
+static int load(void){
     //nadia默认路径
-    char *nadiaPath = "/nadia/config/";
+    char *nadiaPath = "/Users/xiangshi/Documents/workspace_c/nadia-proxy/config/";
     fprintf(stderr, "Naida config path<%s> \n",nadiaPath);
     //加载nadia全部配置
-    load_nadia_config(nadiaPath,&nadiaConfig);
+    return load_nadia_config(nadiaPath,&nadiaConfig);
 }
 
 /*

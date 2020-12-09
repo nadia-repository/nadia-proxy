@@ -5,6 +5,7 @@
 #include "dynamic_string.h"
 #include "arraylist.h"
 #include <ctype.h>
+#include <sys/stat.h>
 
 enum state {INIT,HTTP,SERVERS,LISTEN,LOCATION,ROOT,ALIAS,INDEX,STRATEGY,PROXY,SERVER};
 

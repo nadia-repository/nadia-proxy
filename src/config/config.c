@@ -12,10 +12,10 @@ int load_nadia_config(char *dir,NADIA_CONFIG *config){
 
     //加载代理配置
     NAIDA_PROXY_CONFIG *nadia_proxy_config = malloc(sizeof(NAIDA_PROXY_CONFIG));
-    load_proxy(dir,nadia_proxy_config);
-
+    if(load_proxy(dir,nadia_proxy_config) == 0){
+        return 0;
+    }
     //日志文件映射
-
     config->base_configs = base_configs;
     config->nadia_proxy_config = nadia_proxy_config;
     return 1;

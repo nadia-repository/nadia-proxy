@@ -13,8 +13,8 @@
 #define ARRAYLIST_ADD(list,data) list->add(list,data)
 #define ARRAYLIST_ADD_INDEX(list,index,data) list->add_with_index(list,index,data)
 #define ARRAYLIST_GET(list,index) list->get(list,index)
-#define ARRAYLIST_LENGTH(list) list->arraylist_length(list)
-#define ARRAYLIST_SIZE(list) list->arraylist_size(list)
+#define ARRAYLIST_LENGTH(list) arraylist_length(list)
+#define ARRAYLIST_SIZE(list) arraylist_size(list)
 #define ARRAYLIST_CAST(type,list,index) (type)(ARRAYLIST_GET(list,index))
 
 typedef struct arraylist_struct{
@@ -25,8 +25,8 @@ typedef struct arraylist_struct{
     void (* add)(struct arraylist_struct *list, void *data);
     void (* add_with_index)(struct arraylist_struct *list, int index, void *data);
     void *(* get)(struct arraylist_struct *list, int index);
-    int (* arraylist_length)(struct arraylist_struct *list);
-    int (* arraylist_size)(struct arraylist_struct *list);
+    // int (* arraylist_length)(struct arraylist_struct *list);
+    // int (* arraylist_size)(struct arraylist_struct *list);
 } ARRAYLIST;
 
 

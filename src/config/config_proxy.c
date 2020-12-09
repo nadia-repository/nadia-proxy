@@ -1,7 +1,7 @@
 #include "config_proxy.h"
 
 static void mock_config(NAIDA_PROXY_CONFIG *nadia_proxy_config);
-static void load_proxy_conf(char *path, NAIDA_PROXY_CONFIG *nadia_proxy_config);
+static int load_proxy_conf(char *path, NAIDA_PROXY_CONFIG *nadia_proxy_config);
 
 static void pares_proxy_file(char *filename, NAIDA_PROXY_CONFIG *nadia_proxy_config);
 static void generate_state_chain(FSM **fsm);
@@ -31,8 +31,7 @@ int load_proxy(char *dir, NAIDA_PROXY_CONFIG *nadia_proxy_config){
         mock_config(nadia_proxy_config);
         return 1;
     }else{
-        load_proxy_conf(dir,nadia_proxy_config);
-        return 0;
+        return load_proxy_conf(path,nadia_proxy_config);
     }
 }
 
@@ -92,34 +91,38 @@ static void mock_config(NAIDA_PROXY_CONFIG *nadia_proxy_config){
     path 配置文件路径
     nadia_proxy_config 代理配置文件
 */
-static void load_proxy_conf(char *path, NAIDA_PROXY_CONFIG *nadia_proxy_config){
+static int load_proxy_conf(char *path, NAIDA_PROXY_CONFIG *nadia_proxy_config){
     struct stat sbuf;
     if (stat(path, &sbuf) < 0) {
         fprintf(stderr, "Load proxy.conf is not exist. path=%s \n",path);
-        return;
-    } 
+        return 0;
+    }
+    // if(!IS_ISREG(sbuf.st_mode)){
+    //     fprintf(stderr, "Load proxy.conf is not exist. path=%s \n",path);
+    //     return 0;
+    // }
     nadia_proxy_config->http_config = NULL;
     pares_proxy_file(path,nadia_proxy_config);
+    return 1;
 }
 
 /*
  * 生成状态机链
  */
 void generate_state_chain(FSM **fsm){
-    FSM *server = NULL;
-    FSM *proxy = NULL;
-    FSM *strategy = NULL;
-    FSM *root = NULL;
-    FSM *alias = NULL;
-    FSM *index = NULL;
-    FSM *location = NULL;
-    FSM *listen = NULL;
-    FSM *servers = NULL;
-    FSM *http = NULL;
-    FSM *init = NULL;
+    FSM *server = malloc(sizeof(FSM));
+    FSM *proxy = malloc(sizeof(FSM));
+    FSM *strategy = malloc(sizeof(FSM));
+    FSM *root = malloc(sizeof(FSM));
+    FSM *alias = malloc(sizeof(FSM));
+    FSM *index = malloc(sizeof(FSM));
+    FSM *location = malloc(sizeof(FSM));
+    FSM *listen = malloc(sizeof(FSM));
+    FSM *servers = malloc(sizeof(FSM));
+    FSM *http = malloc(sizeof(FSM));
+    FSM *init = malloc(sizeof(FSM));
 
     //server
-    server = malloc(sizeof(FSM));
     server->current_state = SERVER;
     server->tag=state_tag[server->current_state];
     server->child_state_list = NULL;
@@ -129,7 +132,6 @@ void generate_state_chain(FSM **fsm){
     fsm[server->current_state] = server;
     //----------------------------------------------------------------------
     //proxy
-    proxy = malloc(sizeof(FSM));
     proxy->current_state = PROXY;
     proxy->tag=state_tag[proxy->current_state];
     proxy->child_state_list = ARRAYLIST_INIT_SIZE(2);
@@ -140,7 +142,6 @@ void generate_state_chain(FSM **fsm){
     fsm[proxy->current_state] = proxy;
 
     //strategy
-    strategy = malloc(sizeof(FSM));
     strategy->current_state = STRATEGY;
     strategy->tag=state_tag[strategy->current_state];
     strategy->child_state_list = NULL;
@@ -150,7 +151,6 @@ void generate_state_chain(FSM **fsm){
     fsm[strategy->current_state] = strategy;
 
     //root 互斥 alias
-    root = malloc(sizeof(FSM));
     root->current_state = ROOT;
     root->tag = state_tag[root->current_state];
     root->child_state_list = NULL;
@@ -160,7 +160,6 @@ void generate_state_chain(FSM **fsm){
     fsm[root->current_state] = root;
 
     //alias 互斥 root
-    alias = malloc(sizeof(FSM));
     alias->current_state = ALIAS;
     alias->tag = state_tag[alias->current_state];
     alias->child_state_list = NULL;
@@ -170,9 +169,8 @@ void generate_state_chain(FSM **fsm){
     fsm[alias->current_state] = alias;
 
     //index
-    index = malloc(sizeof(FSM));
     index->current_state = INDEX;
-    index->tag = state_tag[alias->current_state];
+    index->tag = state_tag[index->current_state];
     index->child_state_list = NULL;
     index->frient_state_list = ARRAYLIST_INIT_SIZE(2);
     ARRAYLIST_ADD(index->frient_state_list,root);
@@ -182,7 +180,6 @@ void generate_state_chain(FSM **fsm){
 
     //----------------------------------------------------------------------
     //location
-    location = malloc(sizeof(FSM));
     location->current_state = LOCATION;
     location->tag=state_tag[location->current_state];
     location->child_state_list = ARRAYLIST_INIT_SIZE(5);
@@ -198,7 +195,6 @@ void generate_state_chain(FSM **fsm){
     fsm[location->current_state] = location;
 
     //listen
-    listen = malloc(sizeof(FSM));
     listen->current_state = LISTEN;
     listen->tag=state_tag[listen->current_state];
     listen->child_state_list = NULL;
@@ -209,7 +205,6 @@ void generate_state_chain(FSM **fsm){
 
     //----------------------------------------------------------------------
     //servers
-    servers = malloc(sizeof(FSM));
     servers->current_state = SERVERS;
     servers->tag=state_tag[servers->current_state];
     servers->child_state_list = ARRAYLIST_INIT_SIZE(2);
@@ -222,7 +217,6 @@ void generate_state_chain(FSM **fsm){
 
     //----------------------------------------------------------------------
     //http
-    http = malloc(sizeof(FSM));
     http->current_state = HTTP;
     http->tag=state_tag[http->current_state];
     http->child_state_list = ARRAYLIST_INIT_SIZE(1);
@@ -233,7 +227,6 @@ void generate_state_chain(FSM **fsm){
 
     //----------------------------------------------------------------------
     //init
-    init = malloc(sizeof(FSM));
     init->current_state = INIT;
     init->tag=state_tag[init->current_state];
     init->child_state_list = ARRAYLIST_INIT_SIZE(1);
@@ -260,14 +253,14 @@ static void *parse_servers(char *line, void *config){
     SERVERS_CONFIG *servers_config = malloc(sizeof(SERVERS_CONFIG));
     servers_config->location_list = ARRAYLIST_INIT;
     servers_config->location_map = INIT_HASHMAP;
-    config = servers_config;
+    ARRAYLIST_ADD(http_config->servers_list,servers_config);
     return servers_config;
 }
 
 static void *parse_listen(char *line, void *config){
     SERVERS_CONFIG *servers_config = (SERVERS_CONFIG *)config;
     char port[MAXLINE];
-    sscanf(line,"listen %s",port);
+    sscanf(line," listen %s",port);
     servers_config->listen = port;
 
     return config;
@@ -276,22 +269,24 @@ static void *parse_listen(char *line, void *config){
 static void *parse_location(char *line, void *config){
     SERVERS_CONFIG *servers_config = (SERVERS_CONFIG *)config;
     char modifier[MAXLINE],pattern[MAXLINE];
-    sscanf(line,"location %s %s",modifier,pattern);
+    sscanf(line," location %s %s",modifier,pattern);
 
     LOCATION_CONFIG *location = malloc(sizeof(LOCATION_CONFIG));
-    if(strcmp("=",modifier)>0){
+    location->server_proxy = NULL;
+    location->static_proxy = NULL;
+    if(strstr("=",modifier) != NULL){
         //exact 精确匹配
         location->matchType = EXACT;
         location->pattern = pattern;
-    }else if(strcmp("^~",modifier)>0){
+    }else if(strstr("^~",modifier) != NULL){
         //prefix 前缀匹配
         location->matchType = PREFIX;
         location->pattern = pattern;
-    }else if(strcmp("~",modifier)>0){
+    }else if(strstr("~",modifier) != NULL){
         //regex 正则匹配
         location->matchType = REGEX;
         location->pattern = pattern;
-    }else if(strcmp("~*",modifier)>0){
+    }else if(strstr("~*",modifier) != NULL){
         //regex 正则匹配
         location->matchType = REGEX;
         location->pattern = pattern;
@@ -308,6 +303,7 @@ static void *parse_location(char *line, void *config){
 static void *parse_proxy(char *line,void *config){
     LOCATION_CONFIG *location = (LOCATION_CONFIG *)config;
     SERVER_PROXY *proxy = malloc(sizeof(SERVER_PROXY));
+    proxy->reverse_proxys_list = NULL;
     location->server_proxy = proxy;
     return proxy;
 }
@@ -317,7 +313,7 @@ static void *parse_strategy(char *line, void *config){
     
     proxy->request_count = 0;
     char strategy[MAXLINE];
-    sscanf(line,"strategy %s",strategy);
+    sscanf(line," strategy %s",strategy);
     //ROUND_ROBIN,WEIGHTED_ROUND_ROBIN,IP_HASH
     if(strcmp("ROUND_ROBIN",strategy)>0){
         proxy->proxyStrategy = ROUND_ROBIN;
@@ -337,7 +333,7 @@ static void *parse_root(char *line, void *config){
     LOCATION_CONFIG *location = (LOCATION_CONFIG *)config;
 
     char root[MAXLINE];
-    sscanf(line,"root %s",root);
+    sscanf(line," root %s",root);
     STATIC_PROXY *static_proxy = NULL;
     if(location->static_proxy != NULL){
         static_proxy = location->static_proxy;
@@ -354,7 +350,7 @@ static void *parse_alias(char *line, void *config){
     LOCATION_CONFIG *location = (LOCATION_CONFIG *)config;
 
     char alias[MAXLINE];
-    sscanf(line,"alias %s",alias);
+    sscanf(line," alias %s",alias);
     STATIC_PROXY *static_proxy = NULL;
     if(location->static_proxy != NULL){
         static_proxy = location->static_proxy;
@@ -371,7 +367,7 @@ static void *parse_index(char *line, void *config){
     LOCATION_CONFIG *location = (LOCATION_CONFIG *)config;
 
     char index[MAXLINE];
-    sscanf(line,"index %s",index);
+    sscanf(line," index %s",index);
     STATIC_PROXY *static_proxy = NULL;
     if(location->static_proxy != NULL){
         static_proxy = location->static_proxy;
@@ -387,11 +383,14 @@ static void *parse_index(char *line, void *config){
 static void *parse_server(char *line, void *config){
     SERVER_PROXY *proxy = (SERVER_PROXY *)config;
     char host[MAXLINE],port[MAXLINE],weight[MAXLINE];
-    sscanf(line,"server %s:%s weight=%s",host,port,weight);
+    sscanf(line," server %s:%s weight=%s",host,port,weight);
     REVERSE_PROXY *reverse_proxy = malloc(sizeof(REVERSE_PROXY));
     reverse_proxy->host = host;
     reverse_proxy->port = port;
     reverse_proxy->weight = atoi(weight);
+    if(proxy->reverse_proxys_list == NULL){
+        proxy->reverse_proxys_list = ARRAYLIST_INIT;
+    }
     ARRAYLIST_ADD(proxy->reverse_proxys_list,reverse_proxy);
 
     return reverse_proxy;
@@ -436,7 +435,7 @@ static void pares_proxy_file(char *filename, NAIDA_PROXY_CONFIG *nadia_proxy_con
 
     CONFIG_NODE  *node = (CONFIG_NODE *)POP_STACK(stack);
     FSM *init = status_machine_arrary[INIT];
-    for(int i = 0 ;ARRAYLIST_LENGTH(init->child_state_list) ; i++){
+    for(int i = 0 ;i < ARRAYLIST_LENGTH(init->child_state_list) ; i++){
         generate_proxy_config(node,nadia_proxy_config,ARRAYLIST_GET(init->child_state_list,i));
     }
 }
@@ -477,15 +476,15 @@ static void generate_proxy_config(CONFIG_NODE  *node, void *config, FSM *fsm){
     }
     STRING *string = (STRING *)node->content;
     void *node_config = NULL;
-    if(strcmp(string->string,fsm->tag) > 0){
+    if(strstr(string->string,fsm->tag) != NULL){
         node_config = fsm->parse(string->string,config);
     }
     //parse child
-    for(int i = 0 ;ARRAYLIST_LENGTH(fsm->child_state_list) ; i++){
+    for(int i = 0 ;i < ARRAYLIST_LENGTH(fsm->child_state_list) ; i++){
         generate_proxy_config(node->child,node_config,ARRAYLIST_GET(fsm->child_state_list,i));
     }
     //parse friend
-        for(int i = 0 ;ARRAYLIST_LENGTH(fsm->frient_state_list) ; i++){
-        generate_proxy_config(node->friend,node_config,ARRAYLIST_GET(fsm->frient_state_list,i));
+    for(int i = 0 ;i < ARRAYLIST_LENGTH(fsm->frient_state_list) ; i++){
+        generate_proxy_config(node->friend,config,ARRAYLIST_GET(fsm->frient_state_list,i));
     }
 }

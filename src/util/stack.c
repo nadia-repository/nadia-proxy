@@ -27,7 +27,7 @@ void push_stack(STACK *stack, void *node){
 }
 
 void *pop_stack(STACK *stack){
-    if(stack->sp == 0){
+    if(stack->sp < 0){
         return NULL;
     }
     void *node = stack->nodes[stack->sp];
