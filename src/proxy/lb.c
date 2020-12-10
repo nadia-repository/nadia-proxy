@@ -18,5 +18,5 @@ int ip_hash(char *ip, int size){
             hash += atoi(h);
         }
     }
-    return 1;
+    return hash % size;
 }

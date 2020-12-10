@@ -1,5 +1,5 @@
-#ifndef  PROXY_COMMON_H 
-#define PROXY_COMMON_H 
+#ifndef  __PROXY_COMMON_H__
+#define __PROXY_COMMON_H__ 
 
 #include "config.h"
 #include <stdlib.h>

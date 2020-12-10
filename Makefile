@@ -67,3 +67,8 @@ clean:
 	rm -rf *.dSYM
 	rm -f *.o nadia *~
 	
+install:
+	mkdir -p /home/nadia
+	cp nadia /home/nadia
+	cp home.html /home/nadia
+	cp -r config /home/nadia

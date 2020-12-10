@@ -1,5 +1,6 @@
 #include "proxy.h"
 
+static int match_proxy(char *method,char *uri,SERVERS_CONFIG *server,SDI *sdi);
 static int match_location(char *uri, LMS *lms, SDI *sdi, int (*routine)(char *,char *));
 
 void parser_request(int connfd,SERVERS_CONFIG *server){
@@ -32,8 +33,14 @@ void parser_request(int connfd,SERVERS_CONFIG *server){
     }
 }
 
-
-int match_proxy(char *method,char *uri,SERVERS_CONFIG *server,SDI *sdi){
+/*
+根据当前请求匹配代理信息
+    method 请求method
+    uri 资源地址
+    server 当前监听地址代理信息
+    sds 代理目标
+*/
+static int match_proxy(char *method,char *uri,SERVERS_CONFIG *server,SDI *sdi){
     //1.精确匹配 =
     LMS *exactLocation = (LMS *)GET_HASHMAP(server->location_map,EXACT);
     if(exactLocation != NULL){

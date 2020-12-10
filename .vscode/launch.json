@@ -5,6 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "(lldb) 附加",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "输入程序名称，例如 ${workspaceFolder}/a.out",
+            "processId": "${command:pickProcess}",
+            "MIMode": "lldb"
+        },
+        {
             "name": "(lldb) 启动",
             "type": "cppdbg",
             "request": "launch",
@@ -14,7 +22,11 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
-            "MIMode": "lldb"
+            "MIMode": "lldb",
+            "setupCommands": [
+                {"text": "-gdb-set follow-fork-mode child"}
+            ]
         }
     ]
+
 }
