@@ -13,8 +13,7 @@ typedef struct finite_state_machine {
     enum state current_state;
     char *tag;
     void *(* parse)(char *line,void *config);
-    // int next_state_size;
-    // struct finite_state_machine **next_states;
+
     ARRAYLIST *child_state_list;
     ARRAYLIST *frient_state_list;
 } FSM;

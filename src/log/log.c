@@ -1,5 +1,6 @@
 #include "log.h"
 
+#define FILE_MAX_SIZE (1024*1024)
 
 LOG_INSTANCE *init_log_file(char *dir){
     LOG_INSTANCE *log_instance = malloc(sizeof(LOG_INSTANCE));
@@ -33,16 +34,11 @@ void write_log_file(LOG_TYPE type, LOG_INSTANCE *log_instance){
     LOG_FILE *log_file = (LOG_FILE *)GET_HASHMAP(log_instance->log_file_map,type);
 
     if(log_file->fp == NULL){
-
+		
     }
 
 }
 
-
-
-
- 
-#define FILE_MAX_SIZE (1024*1024)
  
 /*
 获得当前时间字符串
