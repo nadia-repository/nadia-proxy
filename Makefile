@@ -28,40 +28,40 @@ server: src/server/server.c proxy.o proxy_common.o proxy_static.o proxy_dynamic.
 	worker.o \
 	-I src/util \
 	-I src/config \
-	-I src/core \
+	-I src/os \
 	-I src/proxy \
 	$(LIB)
 	rm -f *.o
 
 worker.o: src/server/worker.c 
-	$(CC) $(CFLAGS) -c src/server/worker.c -I src/config -I src/core -I src/util -I src/proxy
+	$(CC) $(CFLAGS) -c src/server/worker.c -I src/config -I src/os -I src/util -I src/proxy
 
 proxy.o: src/proxy/proxy.c src/proxy/proxy_common.c src/proxy/proxy_static.c src/proxy/proxy_dynamic.c src/proxy/lb.c
-	$(CC) $(CFLAGS) -c src/proxy/proxy.c src/proxy/proxy_common.c src/proxy/proxy_static.c src/proxy/proxy_dynamic.c src/proxy/lb.c -I src/config -I src/core -I src/util
+	$(CC) $(CFLAGS) -c src/proxy/proxy.c src/proxy/proxy_common.c src/proxy/proxy_static.c src/proxy/proxy_dynamic.c src/proxy/lb.c -I src/config -I src/os -I src/util
 
 config.o: src/config/config.c src/config/config_configs.c src/config/config_proxy.c 
-	$(CC) $(CFLAGS) -c src/config/config.c src/config/config_configs.c src/config/config_proxy.c  -I src/core -I src/util
+	$(CC) $(CFLAGS) -c src/config/config.c src/config/config_configs.c src/config/config_proxy.c  -I src/os -I src/util
 
-thread.o: src/core/thread.c
-	$(CC) $(CFLAGS) -c src/core/thread.c
+thread.o: src/os/thread.c
+	$(CC) $(CFLAGS) -c src/os/thread.c
 
 match.o: src/util/match.c
 	$(CC) $(CFLAGS) -c src/util/match.c
 
-csapp.o: src/core/csapp.c
-	$(CC) $(CFLAGS) -c src/core/csapp.c
+csapp.o: src/os/csapp.c
+	$(CC) $(CFLAGS) -c src/os/csapp.c
 	
 hashmap.o: src/util/hashmap.c
-	$(CC) $(CFLAGS) -c src/util/hashmap.c -I src/core
+	$(CC) $(CFLAGS) -c src/util/hashmap.c -I src/os
 
 stack.o: src/util/stack.c
-	$(CC) $(CFLAGS) -c src/util/stack.c -I src/core
+	$(CC) $(CFLAGS) -c src/util/stack.c -I src/os
 
 dynamic_string.o: src/util/dynamic_string.c
-	$(CC) $(CFLAGS) -c src/util/dynamic_string.c -I src/core
+	$(CC) $(CFLAGS) -c src/util/dynamic_string.c -I src/os
 
 arraylist.o: src/util/arraylist.c
-	$(CC) $(CFLAGS) -c src/util/arraylist.c -I src/core
+	$(CC) $(CFLAGS) -c src/util/arraylist.c -I src/os
 
 clean:
 	rm -rf *.dSYM

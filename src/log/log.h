@@ -22,3 +22,20 @@ typedef struct log_file_instance{
 LOG_INSTANCE *init_log_file(char *dir);
 
 void write_log_file(LOG_TYPE type, LOG_INSTANCE *log_instance);
+
+
+
+
+
+
+
+
+
+
+
+typedef enum {
+    LOG_DEBUG, 
+    LOG_INFO,
+    TLOG_WARN,
+    TLOG_ERROR
+} log_level;
